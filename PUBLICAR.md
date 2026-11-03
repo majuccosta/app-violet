@@ -91,7 +91,7 @@ Guarde também a **linha inteira**, trocando `[YOUR-PASSWORD]` pela sua senha (s
 | Root Directory | `backend` |
 | Runtime | Python 3 |
 | Build Command | `pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate` |
-| Start Command | `gunicorn config.wsgi:application` |
+| Start Command | `gunicorn config.wsgi:application --workers 2 --threads 2` |
 | Instance Type | **Free** |
 
 4. Em **Environment Variables**, adicione uma por uma:

@@ -5,7 +5,7 @@
    Os caminhos abaixo batem com backend/config/urls.py.
    ========================================================== */
 // Endereço da API publicada (Render). Troque pelo seu depois de publicar, sem barra no final.
-const API_PRODUCAO = "https://violet-api-9441.onrender.com/api";
+const API_PRODUCAO = "https://violet-api.onrender.com/api";
 const API_LOCAL = ["localhost", "127.0.0.1"].includes(location.hostname);
 
 const API_CONFIG = {
@@ -70,11 +70,53 @@ async function renovarToken() {
 }
 function sessaoExpirada() {
   store.set("token", null); store.set("refresh", null);
+  try { Object.keys(sessionStorage).filter((k) => k.startsWith("violet:c:")).forEach((k) => sessionStorage.removeItem(k)); } catch { /* sem cache */ }
   const pagina = location.pathname.split("/").pop();
   if (!["login.html", "cadastro.html", "index.html", ""].includes(pagina)) location.replace("login.html");
 }
 
-async function http(path, { method = "GET", body, form } = {}, jaRenovou = false) {
+/* ---------- Cache das consultas (GET) ----------
+   Voltar para uma tela já visitada mostra na hora o que foi carregado antes e atualiza por trás,
+   então a próxima visita já vem com dados novos. Qualquer alteração (POST, PATCH, DELETE) limpa o cache.
+   Não entram no cache: mensagens do chat, login e verificação (precisam ser sempre atuais). */
+const CACHE_PREFIXO = "violet:c:";
+const emVoo = new Map();                                   // pedidos iguais ao mesmo tempo viram um só
+const cacheiavel = (path) => !/\/(mensagens|auth|verificacao)\//.test(path) && !path.startsWith("/auth/");
+const cacheChave = (path) => CACHE_PREFIXO + String(store.get("token", "") || "").slice(-16) + ":" + path;
+function cacheLer(path) {
+  try { const v = sessionStorage.getItem(cacheChave(path)); return v ? JSON.parse(v) : null; } catch { return null; }
+}
+function cacheGravar(path, data) {
+  try { sessionStorage.setItem(cacheChave(path), JSON.stringify(data)); } catch { /* cheio ou bloqueado */ }
+}
+function cacheLimpar() {
+  try {
+    Object.keys(sessionStorage).filter((k) => k.startsWith(CACHE_PREFIXO)).forEach((k) => sessionStorage.removeItem(k));
+  } catch { /* sem cache */ }
+}
+
+async function http(path, opts = {}, jaRenovou = false) {
+  const metodo = opts.method || "GET";
+  if (metodo !== "GET") {
+    cacheLimpar();
+    return httpBruto(path, opts, jaRenovou);
+  }
+  if (!cacheiavel(path)) return httpBruto(path, opts, jaRenovou);
+  const chave = cacheChave(path);
+  const buscar = () => {
+    if (emVoo.has(chave)) return emVoo.get(chave);
+    const pedido = httpBruto(path, opts, jaRenovou)
+      .then((data) => { cacheGravar(path, data); return data; })
+      .finally(() => emVoo.delete(chave));
+    emVoo.set(chave, pedido);
+    return pedido;
+  };
+  const guardado = cacheLer(path);
+  if (guardado !== null) { buscar().catch(() => {}); return guardado; }   // mostra o guardado e atualiza por trás
+  return buscar();
+}
+
+async function httpBruto(path, { method = "GET", body, form } = {}, jaRenovou = false) {
   const headers = { Accept: "application/json" };
   const token = store.get("token", null);
   if (token) headers.Authorization = `Bearer ${token}`;
@@ -90,7 +132,7 @@ async function http(path, { method = "GET", body, form } = {}, jaRenovou = false
   }
   // Token vencido: renova uma vez e repete; se não der, pede login de novo
   if (res.status === 401 && token && !jaRenovou && !path.startsWith("/auth/")) {
-    if (await renovarToken()) return http(path, { method, body, form }, true);
+    if (await renovarToken()) return httpBruto(path, { method, body, form }, true);
     sessaoExpirada();
   }
   if (!res.ok) {

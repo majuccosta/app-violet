@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#faf7fc">
+  <title>Histórico de denúncias · Violet</title>
+  <link rel="icon" href="../assets/img/logo.svg">
+  <script src="../assets/js/theme.js"></script>
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/i18n.js"></script>
+</head>
+<body>
+  <div class="app has-nav" data-nav="perfil">
+    <header class="topbar">
+      <a class="icon-btn" href="perfil.html" aria-label="Voltar para meu perfil"><i data-icon="arrow-left"></i></a>
+      <span class="topbar__title">Histórico de denúncias</span>
+      <span></span>
+    </header>
+    <main class="screen">
+      <div class="segmented" role="tablist" aria-label="Filtrar por status">
+        <button role="tab" class="is-active" data-filtro="todas" aria-selected="true">Todas</button>
+        <button role="tab" data-filtro="andamento" aria-selected="false">Em andamento</button>
+        <button role="tab" data-filtro="concluida" aria-selected="false">Concluídas</button>
+      </div>
+      <div class="list" id="lista"></div>
+      <div class="callout"><i data-icon="lock"></i><span>Toque em uma denúncia para ver o andamento e a resposta da equipe. Só você vê este histórico. A equipe responsável vê as denúncias sem o seu nome.</span></div>
+    </main>
+
+    <div class="sheet-backdrop" id="sheet-detalhe" role="dialog" aria-modal="true" aria-labelledby="det-titulo">
+      <div class="sheet stack about-sheet" style="max-height:88dvh;overflow-y:auto">
+        <div class="sheet__handle"></div>
+        <div class="stack-sm"><h3 id="det-titulo"></h3><p class="text-sm text-muted" id="det-sub"></p></div>
+        <ol class="linha-tempo" id="det-etapas"></ol>
+        <div class="card card--soft stack-sm" id="det-resposta"></div>
+        <button class="btn btn--soft" onclick="Violet.closeSheet('sheet-detalhe')">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/icons.js"></script>
+  <script src="../assets/js/mock-data.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const { api, esc, icon } = Violet;
+      const todas = await api.listarDenuncias();
+      const lista = document.getElementById("lista");
+      const status = { andamento: ["Em andamento", "badge--warning"], concluida: ["Concluída", "badge--success"] };
+      const render = (f) => {
+        const itens = todas.filter((d) => f === "todas" || d.status === f);
+        lista.innerHTML = itens.length ? itens.map((d) => `
+          <article class="card stack-sm" role="button" tabindex="0" data-i="${todas.indexOf(d)}" style="cursor:pointer">
+            <div class="row-between"><h4>${esc(d.categoria)}</h4><span class="badge ${status[d.status][1]}">${status[d.status][0]}</span></div>
+            <div class="row text-sm text-muted" style="gap:var(--sp-4)">
+              <span class="row" style="gap:4px">${icon("calendar", "sm")} ${esc(d.data)} · ${esc(d.hora)}</span>
+            </div>
+            <div class="row text-sm text-muted" style="gap:4px">${icon("map-pin", "sm")} ${esc(d.local)}</div>
+            <div class="text-xs text-muted">Protocolo <strong class="text-primary">${esc(d.protocolo)}</strong></div>
+          </article>`).join("") : `<div class="empty"><span class="icon-badge icon-badge--round">${icon("file-text")}</span><p>Nenhuma denúncia aqui.</p></div>`;
+      };
+      /* Andamento e resposta da denúncia */
+      const ETAPAS = ["Recebida", "Em análise pela equipe", "Encaminhada ao setor responsável", "Concluída"];
+      const abrir = (d) => {
+        const feitas = d.status === "concluida" ? 4 : 2;           // etapas já cumpridas
+        document.getElementById("det-titulo").textContent = `${d.categoria} · ${d.protocolo}`;
+        document.getElementById("det-sub").textContent = `${d.data} · ${d.hora} · ${d.local}`;
+        document.getElementById("det-etapas").innerHTML = ETAPAS.map((t, k) => `
+          <li class="${k < feitas ? "is-feita" : k === feitas ? "is-atual" : ""}"><span class="linha-tempo__marca">${k < feitas ? icon("check", "sm") : ""}</span><span>${t}</span></li>`).join("");
+        document.getElementById("det-resposta").innerHTML = d.status === "concluida"
+          ? `<h4>Resposta da equipe</h4><p class="text-sm" style="line-height:1.55">Sua denúncia foi analisada e encaminhada aos setores responsáveis. Se quiser conversar com alguém, procure o Núcleo de Apoio da instituição ou ligue 180.</p><p class="text-xs text-muted">Mensagem padrão de demonstração.</p>`
+          : `<h4>Em andamento</h4><p class="text-sm" style="line-height:1.55">A equipe está analisando o seu relato. Você será avisada aqui e nas notificações quando houver novidade. Seu nome não aparece para quem analisa.</p>`;
+        Violet.openSheet("sheet-detalhe");
+      };
+      lista.addEventListener("click", (e) => { const a = e.target.closest("[data-i]"); if (a) abrir(todas[a.dataset.i]); });
+      lista.addEventListener("keydown", (e) => { if (e.key === "Enter") { const a = e.target.closest("[data-i]"); if (a) abrir(todas[a.dataset.i]); } });
+      document.querySelectorAll("[data-filtro]").forEach((b) => b.addEventListener("click", () => {
+        document.querySelectorAll("[data-filtro]").forEach((x) => { x.classList.toggle("is-active", x === b); x.setAttribute("aria-selected", x === b); });
+        render(b.dataset.filtro);
+      }));
+      render("todas");
+    });
+  </script>
+</body>
+</html>

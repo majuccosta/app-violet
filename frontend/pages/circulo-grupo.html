@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#faf7fc">
+  <title>Grupo de trajeto · Violet</title>
+  <link rel="icon" href="../assets/img/logo.svg">
+  <script src="../assets/js/theme.js"></script>
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/i18n.js"></script>
+</head>
+<body>
+  <div class="app has-nav" data-nav="rede">
+    <header class="topbar">
+      <span></span>
+      <span class="topbar__title">Grupo de trajeto</span>
+      <button class="icon-btn" id="btn-compartilhar-link" aria-label="Convidar"><i data-icon="share"></i></button>
+    </header>
+
+    <main class="screen" id="conteudo">
+      <div class="card card--soft text-center text-muted">Carregando…</div>
+    </main>
+
+    <div class="sheet-backdrop" id="sheet-sair" role="dialog" aria-modal="true" aria-labelledby="sair-titulo">
+      <div class="sheet stack">
+        <div class="sheet__handle"></div>
+        <h3 id="sair-titulo">Sair do grupo?</h3>
+        <p class="text-sm text-muted">As participantes serão avisadas e sua localização deixará de ser compartilhada com elas.</p>
+        <button class="btn btn--primary" id="confirmar-sair">Sair do grupo</button>
+        <button class="btn btn--soft" onclick="Violet.closeSheet('sheet-sair')">Continuar no grupo</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/icons.js"></script>
+  <script src="../assets/js/mock-data.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/mapa.js"></script>
+  <script src="../assets/js/pages/circulo.js"></script>
+</body>
+</html>

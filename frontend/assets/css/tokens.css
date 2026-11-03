@@ -1,0 +1,201 @@
+/* ==========================================================
+   VIOLET — Design tokens
+   Altere aqui cores, fontes e espaçamentos: todo o app herda.
+   ========================================================== */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap");
+
+:root {
+  /* Marca */
+  --violet-900: #2a0b3d;
+  --violet-800: #3d1257;
+  --violet-700: #4f1a70;
+  --violet-600: #64248c;   /* cor primária */
+  --violet-500: #7d3aa8;
+  --violet-400: #a26ccb;
+  --violet-300: #c9a6e4;
+  --violet-200: #e4d2f3;
+  --violet-100: #f1e8f9;
+  --violet-50:  #f9f5fc;
+
+  /* Acentos femininos (orquídea / rosa) */
+  --orchid-500: #b4479b;
+  --orchid-300: #e3a3d2;
+  --orchid-100: #fbe8f4;
+  --peach-100: #fff0ea;
+
+  /* Gradientes */
+  --grad-primary: linear-gradient(135deg, #7a2fb0 0%, #a23fa8 55%, #c75a9e 100%);
+  --grad-primary-hover: linear-gradient(135deg, #6a2597 0%, #8f3194 55%, #b24a8c 100%);
+  --grad-soft: linear-gradient(135deg, #f3e8fb 0%, #fbe8f4 100%);
+  --grad-hero: linear-gradient(135deg, #efe0fb 0%, #fbe4f1 60%, #fff0ea 100%);
+  --grad-danger: radial-gradient(circle at 30% 25%, #ff7a8e 0%, #ef3355 55%, #c81e45 100%);
+
+  /* Neutros */
+  --ink-900: #1d1424;
+  --ink-700: #3f3547;
+  --ink-500: #6f6578;
+  --ink-400: #958c9d;
+  --ink-300: #c7c0cd;
+  --line:    #ece5f1;
+  --surface: #ffffff;
+  --bg:      #faf7fc;
+
+  /* Estados */
+  --danger-600: #d61f3a;
+  --danger-500: #ec2f4b;
+  --danger-100: #fde7ea;
+  --success-600: #1f8a5b;
+  --success-100: #e2f5ec;
+  --warning-600: #a86a00;
+  --warning-100: #fdf1d9;
+  --info-100: #ece8fb;
+
+  /* Tipografia */
+  --font-display: "Poppins", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.8125rem;
+  --fs-md: 0.9375rem;
+  --fs-lg: 1.125rem;
+  --fs-xl: 1.375rem;
+  --fs-2xl: 1.75rem;
+
+  /* Espaçamento */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 20px; --sp-6: 24px; --sp-8: 32px; --sp-10: 40px;
+
+  /* Formas */
+  --r-sm: 12px;
+  --r-md: 16px;
+  --r-lg: 24px;
+  --r-xl: 32px;
+  --r-full: 999px;
+
+  /* Sombras */
+  --shadow-sm: 0 2px 8px rgba(122, 47, 176, .06), 0 1px 2px rgba(42, 11, 61, .04);
+  --shadow-md: 0 8px 24px rgba(122, 47, 176, .10);
+  --shadow-lg: 0 24px 50px rgba(74, 20, 110, .18);
+  --shadow-primary: 0 10px 24px rgba(162, 63, 168, .32);
+  --shadow-danger: 0 12px 30px rgba(214, 31, 58, .40);
+
+  --nav-h: 50px;
+  --nav-gap: 12px;          /* distância da barra flutuante até a borda */
+  --app-w: 420px;
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  --spring: cubic-bezier(.34, 1.56, .64, 1);
+}
+
+/* ==========================================================
+   TEMA — tokens que mudam entre claro e escuro
+   (o tema escuro é ativado por <html data-theme="dark">, via theme.js)
+   ========================================================== */
+:root {
+  color-scheme: light;
+  --page-bg: #ebe3f1;
+  --page-bg-wide: radial-gradient(circle at 20% 10%, #f4e3f7, #e6d9f2 50%, #d9cbe9);
+  --app-glow-1: rgba(227, 163, 210, .28);
+  --app-glow-2: rgba(201, 166, 228, .25);
+  --bar-bg: rgba(250, 247, 252, .92);
+  --hover: rgba(100, 36, 140, .08);
+  --glass: rgba(255, 255, 255, .86);
+  --glass-border: rgba(236, 229, 241, .9);
+  --glass-nav: rgba(255, 255, 255, .82);
+  --glass-nav-border: rgba(255, 255, 255, .9);
+  /* Vidro da barra inferior (claro) */
+  --nav-glass-bg: linear-gradient(145deg, rgba(255, 255, 255, .62) 0%, rgba(255, 255, 255, .22) 100%);
+  --nav-glass-border: rgba(255, 255, 255, .7);
+  --nav-glass-shadow: inset 0 1px 1px rgba(255, 255, 255, .95), inset 0 -1px 2px rgba(255, 255, 255, .35), 0 8px 24px rgba(74, 20, 110, .16);
+  --nav-icon: #4a3a5a;
+  --chip-bg: rgba(255, 255, 255, .75);
+  --mood-glow: rgba(255, 255, 255, .9);
+  --on-ink: #fff;                 /* texto sobre --ink-900 */
+  --warning-ink: #6b4300;
+  --brand-a: #64248c;             /* roxo de marca fixo (não muda no escuro) */
+  --brand-b: #3d1257;
+
+  --tone1-bg: #f6d7e6; --tone1-fg: #8a1f55;
+  --tone2-bg: #d9e4fb; --tone2-fg: #23468f;
+  --tone3-bg: #dcf1e5; --tone3-fg: #1b6d47;
+  --tone4-bg: #fde6cf; --tone4-fg: #8a4b0c;
+
+  --map-line: rgba(100, 36, 140, .05);
+  --map-bg1: #efe6f7; --map-bg2: #f9f5fc;
+  --map-road: #fff; --map-park: #e3f1e6; --map-lake: #dfe9fb;
+  --map-badge: rgba(255, 255, 255, .92);
+  --share-bg1: #e7f7ee; --share-bg2: #f4fbf6; --share-border: #cdebd9; --share-badge: #d3f0df;
+
+  /* Tela inicial */
+  --w-grad: linear-gradient(180deg, #e9dcf7 0%, #dcc8f1 45%, #c7a9e6 75%, #5a2384 100%);
+  --w-wave: #e2d1f5; --w-blob: #b791dd; --w-dots: #a983d3;
+  --w-ink: #241030; --w-ink2: #2a0b3d;
+  --w-glass: rgba(255, 255, 255, .4);
+  /* Ilustração da tela inicial (cores que mudam no escuro) */
+  --art-cabelo: #2b0f3d;
+  --art-roupa-c: #5b2388; --art-roupa-c2: #6c2d9e;
+  --art-roupa-e: #d6bdf0; --art-roupa-d: #4a1770;
+  --art-pred: #a57fcd; --art-janela: #e4d4f4;
+  --art-fade: #3a1257;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --violet-50: #221631; --violet-100: #2c1b40; --violet-200: #3f2a5c; --violet-300: #5d4085;
+  --violet-400: #9566c6; --violet-500: #b88ae0; --violet-600: #c9a1ee; --violet-700: #d9bcf5; --violet-800: #e9d9fa;
+  --orchid-500: #e07bc6; --orchid-100: #3a1830; --peach-100: #3a2420;
+
+  --grad-soft: linear-gradient(135deg, #2c1b45 0%, #3a1c3f 100%);
+  --grad-hero: linear-gradient(135deg, #261638 0%, #37183a 60%, #33201f 100%);
+
+  --ink-900: #f5eefa; --ink-700: #dbd0e6; --ink-500: #a99db6; --ink-400: #8a7e9a; --ink-300: #54476a;
+  --line: #3a2b4b; --surface: #201429; --bg: #150d1d;
+
+  --danger-600: #ff6b82; --danger-100: #3f1621;
+  --success-600: #4fcf95; --success-100: #12342a;
+  --warning-600: #f0b34a; --warning-100: #3a2a0b; --info-100: #26214a;
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, .35), 0 1px 2px rgba(0, 0, 0, .25);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, .4);
+  --shadow-lg: 0 24px 50px rgba(0, 0, 0, .55);
+
+  --page-bg: #0d0712;
+  --page-bg-wide: radial-gradient(circle at 20% 10%, #1f1230, #130a1c 50%, #0b0610);
+  --app-glow-1: rgba(180, 71, 155, .16);
+  --app-glow-2: rgba(122, 47, 176, .18);
+  --bar-bg: rgba(21, 13, 29, .92);
+  --hover: rgba(201, 161, 238, .12);
+  --glass: rgba(38, 25, 52, .86);
+  --glass-border: rgba(255, 255, 255, .08);
+  --glass-nav: rgba(31, 20, 41, .85);
+  --glass-nav-border: rgba(255, 255, 255, .08);
+  /* Vidro da barra inferior (escuro) */
+  --nav-glass-bg: linear-gradient(145deg, rgba(255, 255, 255, .16) 0%, rgba(255, 255, 255, .05) 100%);
+  --nav-glass-border: rgba(255, 255, 255, .18);
+  --nav-glass-shadow: inset 0 1px 1px rgba(255, 255, 255, .28), inset 0 -1px 2px rgba(255, 255, 255, .06), 0 8px 24px rgba(0, 0, 0, .45);
+  --nav-icon: #e6daf0;
+  --chip-bg: rgba(255, 255, 255, .06);
+  --mood-glow: rgba(201, 161, 238, .22);
+  --on-ink: #1d1424;
+  --warning-ink: #f6d9a0;
+
+  --tone1-bg: #4a2038; --tone1-fg: #f2b3d2;
+  --tone2-bg: #1f3358; --tone2-fg: #aac4f5;
+  --tone3-bg: #17382a; --tone3-fg: #96dfb9;
+  --tone4-bg: #432a10; --tone4-fg: #f3c38e;
+
+  --map-line: rgba(201, 161, 238, .07);
+  --map-bg1: #1c1228; --map-bg2: #150d1d;
+  --map-road: #33254a; --map-park: #17301f; --map-lake: #172a4a;
+  --map-badge: rgba(31, 20, 41, .92);
+  --share-bg1: #12302a; --share-bg2: #0f2620; --share-border: #1f4a3a; --share-badge: #1b4a39;
+
+  --w-grad: linear-gradient(180deg, #1f1230 0%, #2a1741 45%, #3b1f5c 75%, #120a1a 100%);
+  --w-wave: #2e1b45; --w-blob: #5b3590; --w-dots: #7a55ab;
+  --w-ink: #f3e8fb; --w-ink2: #e4d2f3;
+  --w-glass: rgba(255, 255, 255, .1);
+  --art-cabelo: #14081d;
+  --art-roupa-c: #7d3bb5; --art-roupa-c2: #9a54d0;
+  --art-roupa-e: #b896dc; --art-roupa-d: #5b2a8f;
+  --art-pred: #3e2463; --art-janela: #ffd98a;
+  --art-fade: #120a1a;
+}

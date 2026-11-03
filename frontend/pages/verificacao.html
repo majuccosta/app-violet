@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#64248c">
+  <title>Verificação de identidade · Violet</title>
+  <link rel="icon" href="../assets/img/logo.svg">
+  <script src="../assets/js/theme.js"></script>
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/i18n.js"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <button class="icon-btn" id="btn-voltar" aria-label="Voltar"><i data-icon="arrow-left"></i></button>
+      <span class="topbar__title">Verificação de identidade</span>
+      <span></span>
+    </header>
+    <div style="padding:0 var(--sp-5)"><div class="progress" aria-hidden="true"><span id="progresso" style="width:0%"></span></div></div>
+
+    <main class="screen">
+      <!-- 1. Introdução -->
+      <section data-step="1" class="stack fade-in" style="flex:1">
+        <div class="card card--hero" style="display:grid;place-items:center;padding:var(--sp-8)">
+          <div class="icon-badge icon-badge--round" style="width:84px;height:84px;background:var(--surface)"><i data-icon="shield-check" data-size="xl"></i></div>
+        </div>
+        <div class="stack-sm">
+          <h2>Sua segurança é prioridade</h2>
+          <p class="lead">Verificamos a identidade de todas as usuárias para manter o Violet um ambiente seguro e confiável.</p>
+        </div>
+        <div class="divided-list">
+          <div class="list-item"><span class="icon-badge"><i data-icon="id-card"></i></span><div class="grow"><div class="list-item__title">Documento oficial com foto</div><div class="list-item__sub">RG ou CNH, frente e verso</div></div></div>
+          <div class="list-item"><span class="icon-badge"><i data-icon="sun"></i></span><div class="grow"><div class="list-item__title">Ambiente iluminado</div><div class="list-item__sub">Evite reflexos no documento</div></div></div>
+        </div>
+        <div class="callout"><i data-icon="lock"></i><span>Seus dados são criptografados e usados apenas para verificação, conforme a LGPD. O processo leva cerca de 1 minuto.</span></div>
+        <button class="btn btn--primary push-bottom" data-next>Começar verificação</button>
+      </section>
+
+      <!-- 2. Frente -->
+      <section data-step="2" class="stack fade-in" hidden style="flex:1">
+        <div class="stack-sm">
+          <h2>Frente do documento</h2>
+          <p class="lead">Posicione a frente do seu RG ou CNH dentro da moldura.</p>
+        </div>
+        <div class="camera"><div class="camera__frame" data-frame>Frente do documento</div></div>
+        <label class="shutter push-bottom" aria-label="Tirar foto da frente">
+          <i data-icon="camera" data-size="lg"></i>
+          <input type="file" accept="image/*" capture="environment" class="sr-only" data-capture>
+        </label>
+      </section>
+
+      <!-- 3. Verso -->
+      <section data-step="3" class="stack fade-in" hidden style="flex:1">
+        <div class="stack-sm">
+          <h2>Verso do documento</h2>
+          <p class="lead">Agora vire o documento e fotografe a parte de trás.</p>
+        </div>
+        <div class="camera"><div class="camera__frame" data-frame>Verso do documento</div></div>
+        <label class="shutter push-bottom" aria-label="Tirar foto do verso">
+          <i data-icon="camera" data-size="lg"></i>
+          <input type="file" accept="image/*" capture="environment" class="sr-only" data-capture>
+        </label>
+      </section>
+
+
+      <!-- 4. Conferir dados -->
+      <section data-step="4" class="stack fade-in" hidden style="flex:1">
+        <div class="stack-sm">
+          <h2>Confira suas informações</h2>
+          <p class="lead">Se algo estiver errado, tire as fotos novamente.</p>
+        </div>
+        <div id="analisando" class="card card--soft row" style="justify-content:center;padding:var(--sp-6)">
+          <i data-icon="sparkles"></i><span class="fw-600 text-primary">Analisando documento…</span>
+        </div>
+        <dl class="summary" id="dados-doc" hidden></dl>
+        <div class="stack-sm push-bottom">
+          <button class="btn btn--primary" id="btn-confirmar" disabled>Confirmar</button>
+          <button class="btn btn--soft" id="btn-refazer">Tirar novamente</button>
+        </div>
+      </section>
+
+      <!-- 5. Aprovada -->
+      <section data-step="5" class="stack fade-in" hidden style="flex:1;align-items:center;justify-content:center;text-align:center">
+        <div class="result-icon"><i data-icon="shield-check" data-size="xl"></i></div>
+        <h1>Identidade verificada!</h1>
+        <p class="lead">Tudo certo. Agora você tem acesso a todos os recursos do Violet.</p>
+        <a href="home.html" class="btn btn--primary" style="margin-top:var(--sp-6)">Ir para o início</a>
+      </section>
+    </main>
+  </div>
+
+  <script src="../assets/js/icons.js"></script>
+  <script src="../assets/js/mock-data.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/pages/verificacao.js"></script>
+</body>
+</html>

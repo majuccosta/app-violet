@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#faf7fc">
+  <title>Novo grupo · Violet</title>
+  <link rel="icon" href="../assets/img/logo.svg">
+  <script src="../assets/js/theme.js"></script>
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/i18n.js"></script>
+</head>
+<body>
+  <div class="app has-nav" data-nav="conversas">
+    <header class="topbar" style="grid-template-columns:44px 1fr 44px">
+      <button class="icon-btn" type="button" data-back="conversas.html" aria-label="Voltar"><i data-icon="arrow-left"></i></button>
+      <span class="topbar__title">Novo grupo</span>
+      <span></span>
+    </header>
+
+    <main class="screen">
+      <form id="form-grupo-chat" class="stack" novalidate style="flex:1">
+        <section class="grupo-hero">
+          <span class="avatar avatar--group avatar--xl" id="prev-avatar" data-tone="1"><i data-icon="users" data-size="lg"></i></span>
+          <div class="grupo-hero__cores" role="radiogroup" aria-label="Cor do grupo">
+            <button type="button" class="cor is-active" data-tone="1" role="radio" aria-checked="true" aria-label="Rosa"></button>
+            <button type="button" class="cor" data-tone="2" role="radio" aria-checked="false" aria-label="Azul"></button>
+            <button type="button" class="cor" data-tone="3" role="radio" aria-checked="false" aria-label="Verde"></button>
+            <button type="button" class="cor" data-tone="4" role="radio" aria-checked="false" aria-label="Pêssego"></button>
+          </div>
+        </section>
+
+        <div class="field">
+          <label class="field__label" for="nome">Nome do grupo</label>
+          <div class="input-wrap"><i data-icon="message"></i><input id="nome" name="nome" placeholder="Ex.: Turma da faculdade" required data-min="2" maxlength="40" autocomplete="off"></div>
+          <span class="field__error">Dê um nome ao grupo.</span>
+        </div>
+        <div class="field">
+          <label class="field__label" for="descricao">Sobre o grupo <span class="text-muted fw-400">(opcional)</span></label>
+          <div class="input-wrap"><i data-icon="edit"></i><input id="descricao" name="descricao" placeholder="Do que esse grupo fala?" maxlength="80" autocomplete="off"></div>
+        </div>
+
+        <section class="stack-sm">
+          <div class="section-title" style="margin-bottom:0"><h3>Participantes</h3><span class="text-xs text-muted" id="contagem">Nenhuma selecionada</span></div>
+          <div class="grupo-chips" id="chips" hidden></div>
+          <label class="input-wrap"><i data-icon="search"></i><input type="search" id="busca-contatos" placeholder="Buscar nos meus contatos…" aria-label="Buscar contatos" autocomplete="off"></label>
+          <div class="pick-list" id="lista-pick"></div>
+          <span class="field__error" id="erro-membros" style="display:none">Escolha pelo menos uma pessoa.</span>
+        </section>
+
+        <div class="callout"><i data-icon="info"></i><span>Este grupo é só para conversar. Para combinar trajetos com outras usuárias, use o <a class="link" href="circulo-criar.html">Círculo de Apoio</a>.</span></div>
+
+        <div class="stack-sm push-bottom">
+          <button type="submit" class="btn btn--primary" id="btn-criar">Criar grupo</button>
+          <a href="conversas.html" class="btn btn--ghost">Cancelar</a>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <script src="../assets/js/icons.js"></script>
+  <script src="../assets/js/mock-data.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/pages/grupo.js"></script>
+</body>
+</html>

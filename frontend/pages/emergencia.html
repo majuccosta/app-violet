@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2a0b3d">
+  <title>Emergência · Violet</title>
+  <link rel="icon" href="../assets/img/logo.svg">
+  <script src="../assets/js/theme.js"></script>
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/i18n.js"></script>
+</head>
+<body style="background:#1a0726">
+  <div class="app" style="background:#3d1257">
+    <header class="topbar topbar--dark">
+      <button class="icon-btn" data-back="home.html" aria-label="Voltar" id="btn-voltar"><i data-icon="arrow-left"></i></button>
+      <span class="topbar__title">Emergência</span>
+      <a class="icon-btn" href="tel:190" aria-label="Ligar para 190"><i data-icon="phone"></i></a>
+    </header>
+
+    <!-- Estado 1: pronto para acionar -->
+    <main class="sos-screen" id="estado-pronto">
+      <div class="sos-intro">
+        <h1>Precisa de ajuda?</h1>
+        <p id="sos-dica">Segure o botão por <strong>3 segundos</strong> para pedir socorro.</p>
+      </div>
+
+      <div class="stage">
+        <div class="sos-orb" id="orb">
+          <span class="sos-wave" aria-hidden="true"></span>
+          <span class="sos-wave" aria-hidden="true"></span>
+          <span class="sos-wave" aria-hidden="true"></span>
+          <button class="sos-big" id="sos" aria-describedby="sos-dica">
+            <span class="sos-big__inner">
+              <span class="sos-big__icon" id="sos-icone"><i data-icon="bell" data-size="xl"></i></span>
+              <span class="sos-big__count" id="sos-count" hidden>3</span>
+              <span class="sos-big__label" id="sos-label">Segure</span>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <ul class="sos-will" aria-label="O que acontece ao acionar">
+        <li><span><i data-icon="map-pin" data-size="sm"></i></span>Localização<br>em tempo real</li>
+        <li><span><i data-icon="heart" data-size="sm"></i></span>Contatos<br>de confiança</li>
+        <li><span><i data-icon="phone" data-size="sm"></i></span>Central de<br>apoio (180)</li>
+      </ul>
+
+      <div class="stack-sm" style="width:100%">
+        <a href="home.html" class="btn btn--glass">Cancelar</a>
+        <p class="text-xs" style="color:rgba(255,255,255,.6)">Em perigo imediato, ligue <a href="tel:190" style="text-decoration:underline">190</a> ou <a href="tel:180" style="text-decoration:underline">180</a>.</p>
+      </div>
+    </main>
+
+    <!-- Estado 2: alerta enviado -->
+    <main class="sos-screen" id="estado-ativo" hidden>
+      <div class="stack-sm" style="align-items:center;margin-top:var(--sp-4)">
+        <div class="sos-orb sos-orb--sm is-active" aria-hidden="true">
+          <span class="sos-wave"></span><span class="sos-wave"></span><span class="sos-wave"></span>
+          <span class="sos-big sos-big--sm"><span class="sos-big__icon"><i data-icon="bell" data-size="lg"></i></span></span>
+        </div>
+        <h1 style="margin-top:var(--sp-3)">Alerta de emergência ativo</h1>
+        <span class="sos-timer" id="cronometro">00:00</span>
+        <span class="rec" id="rec" hidden>Gravando áudio</span>
+      </div>
+
+      <ul class="sos-list" id="sos-status">
+        <li data-item="localizacao"><i data-icon="map-pin"></i><span>Localização em tempo real</span><span class="state is-pending">enviando…</span></li>
+        <li data-item="contatos"><i data-icon="heart"></i><span>Contatos de confiança</span><span class="state is-pending">aguardando…</span></li>
+        <li data-item="ligue180"><i data-icon="phone"></i><span>Central de Atendimento (180)</span><span class="state is-pending">aguardando…</span></li>
+      </ul>
+
+      <label class="btn btn--glass" style="cursor:pointer">
+        <i data-icon="camera" data-size="sm"></i> Capturar foto ou vídeo
+        <input type="file" accept="image/*,video/*" capture="environment" class="sr-only" id="captura">
+      </label>
+
+      <div class="stack-sm push-bottom" style="width:100%">
+        <button class="btn btn--white" id="btn-encerrar">Estou segura — encerrar alerta</button>
+      </div>
+    </main>
+
+    <div class="sheet-backdrop" id="sheet-encerrar" role="dialog" aria-modal="true" aria-labelledby="sheet-titulo">
+      <div class="sheet stack">
+        <div class="sheet__handle"></div>
+        <h3 id="sheet-titulo">Encerrar o alerta?</h3>
+        <p class="text-muted text-sm">Seus contatos serão avisados de que você está segura e o compartilhamento de localização será interrompido.</p>
+        <button class="btn btn--primary" id="confirmar-encerrar">Sim, estou segura</button>
+        <button class="btn btn--soft" onclick="Violet.closeSheet('sheet-encerrar')">Manter alerta ativo</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/icons.js"></script>
+  <script src="../assets/js/mock-data.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/pages/emergencia.js"></script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#e7d6f7">
+  <title>Boas-vindas · Violet</title>
+  <link rel="icon" href="../assets/img/logo.svg">
+  <script src="../assets/js/theme.js"></script>
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/i18n.js"></script>
+  <style>
+    .tour { min-height: 100dvh; display: flex; flex-direction: column; padding: var(--sp-5); gap: var(--sp-5); }
+    .tour__skip { align-self: flex-end; }
+    .tour__body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: var(--sp-4); }
+    .tour__art { width: 112px; height: 112px; border-radius: 50%; display: grid; place-items: center; background: var(--grad-primary); color: #fff; box-shadow: var(--shadow-md, 0 8px 24px rgba(100,36,140,.3)); }
+    .tour__art svg { width: 52px; height: 52px; }
+    .tour__dots { display: flex; justify-content: center; gap: 8px; }
+    .tour__dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-300, #cdbfd8); }
+    .tour__dots i.is-on { width: 24px; border-radius: 8px; background: var(--violet-600, #64248c); }
+    .tour__perms { width: 100%; text-align: left; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <main class="tour">
+      <button class="btn btn--ghost btn--sm tour__skip" id="pular">Pular</button>
+      <section class="tour__body" id="corpo" aria-live="polite"></section>
+      <div class="tour__dots" id="pontos" aria-hidden="true"></div>
+      <div class="stack-sm">
+        <button class="btn btn--primary" id="proximo">Próximo</button>
+        <button class="btn btn--soft" id="voltar" hidden>Voltar</button>
+      </div>
+    </main>
+  </div>
+  <script src="../assets/js/icons.js"></script>
+  <script src="../assets/js/mock-data.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const { icon, esc, disp } = Violet;
+      const corpo = document.getElementById("corpo"), pontos = document.getElementById("pontos");
+      const SLIDES = [
+        { icone: "heart", t: "Bem-vinda ao Violet", d: "Um espaço seguro, só para mulheres do campus. Vamos conhecer o essencial em menos de um minuto." },
+        { icone: "bell", t: "Botão de emergência", d: "Segure o botão por 3 segundos para avisar seus contatos de confiança e a central de apoio. Em Configurações você liga o alerta silencioso, sem som e sem vibração." },
+        { icone: "users", t: "Sua rede de apoio", d: "Cadastre até 5 contatos de confiança. Eles podem ser avisados em emergências e acompanhar seus trajetos.", extra: `<a class="btn btn--soft" href="contato-adicionar.html" target="_blank" rel="noopener">Adicionar contato agora</a>` },
+        { icone: "eye-off", t: "Discrição", d: "O botão de saída rápida (o olho riscado) fecha o app e abre uma tela neutra. Você também pode criar um PIN e esconder o conteúdo das notificações." },
+        { icone: "shield-check", t: "Permissões, uma de cada vez", d: "Pedimos só o necessário e explicamos para quê. Você pode mudar isso depois nas configurações do navegador.", perms: true }
+      ];
+      let i = 0;
+      const estado = {};
+      const PERMS = [
+        { id: "loc", nome: "Localização", porque: "Para enviar onde você está quando acionar a emergência ou compartilhar um trajeto." },
+        { id: "not", nome: "Notificações", porque: "Para avisar de mensagens e de pedidos da sua rede, mesmo com o app fechado." }
+      ];
+      const rotulo = (id) => estado[id] === "ok" ? "Permitido ✓" : estado[id] === "nao" ? "Não permitido" : "Permitir";
+      function perms() {
+        return `<div class="stack-sm tour__perms">${PERMS.map((p) => `
+          <div class="card stack-sm"><div class="row-between"><b>${p.nome}</b>
+            <button class="btn btn--soft btn--sm" data-perm="${p.id}" ${estado[p.id] === "ok" ? "disabled" : ""}>${rotulo(p.id)}</button></div>
+            <p class="text-sm text-muted">${p.porque}</p></div>`).join("")}
+          <p class="text-xs text-muted">Câmera e microfone só são pedidos se você escolher enviar foto, vídeo ou áudio durante uma emergência.</p></div>`;
+      }
+      function desenhar() {
+        const s = SLIDES[i];
+        corpo.innerHTML = `<span class="tour__art">${icon(s.icone)}</span><h1 style="font-size:var(--fs-xl)">${esc(s.t)}</h1>
+          <p class="text-muted" style="max-width:30ch;line-height:1.55">${esc(s.d)}</p>${s.extra || ""}${s.perms ? perms() : ""}`;
+        pontos.innerHTML = SLIDES.map((_, k) => `<i class="${k === i ? "is-on" : ""}"></i>`).join("");
+        document.getElementById("proximo").textContent = i === SLIDES.length - 1 ? "Começar" : "Próximo";
+        document.getElementById("voltar").hidden = i === 0;
+        corpo.style.animation = "none"; void corpo.offsetWidth; corpo.style.animation = "";
+      }
+      const terminar = () => { disp.set("tutorial_visto", true); disp.set("tutorial_pendente", false); Violet.irPara("home.html"); };
+      document.getElementById("proximo").addEventListener("click", () => (i < SLIDES.length - 1 ? (i++, desenhar()) : terminar()));
+      document.getElementById("voltar").addEventListener("click", () => { i = Math.max(0, i - 1); desenhar(); });
+      document.getElementById("pular").addEventListener("click", terminar);
+      corpo.addEventListener("click", (e) => {
+        const b = e.target.closest("[data-perm]"); if (!b) return;
+        const id = b.dataset.perm;
+        const feito = (ok) => { estado[id] = ok ? "ok" : "nao"; desenhar(); };
+        if (id === "loc") {
+          if (!navigator.geolocation) return feito(false);
+          navigator.geolocation.getCurrentPosition(() => feito(true), () => feito(false), { timeout: 10000 });
+        } else {
+          if (!("Notification" in window)) return feito(false);
+          Notification.requestPermission().then((r) => feito(r === "granted")).catch(() => feito(false));
+        }
+      });
+      desenhar();
+    });
+  </script>
+</body>
+</html>

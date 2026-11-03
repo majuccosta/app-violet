@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#e7d6f7">
+  <title>Pontos seguros · Violet</title>
+  <link rel="icon" href="../assets/img/logo.svg">
+  <script src="../assets/js/theme.js"></script>
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/i18n.js"></script>
+</head>
+<body>
+  <div class="app has-nav" data-nav="inicio">
+    <header class="topbar">
+      <a class="icon-btn" href="home.html" aria-label="Voltar para o início"><i data-icon="arrow-left"></i></a>
+      <span class="topbar__title">Pontos seguros</span>
+      <span></span>
+    </header>
+    <main class="screen">
+      <section class="card card--hero" style="padding:var(--sp-5)">
+        <h3 style="color:var(--violet-800)">Mapa do campus</h3>
+        <p class="text-sm" style="color:var(--ink-700);margin-top:4px">Toque em um lugar para ver como ele pode te ajudar e combinar seu trajeto.</p>
+      </section>
+
+      <div class="chips" id="filtros" role="group" aria-label="Filtrar por tipo">
+        <button class="chip is-active" data-tipo="todos">Todos</button>
+        <button class="chip" data-tipo="seguranca">Segurança</button>
+        <button class="chip" data-tipo="apoio">Apoio</button>
+        <button class="chip" data-tipo="transporte">Transporte</button>
+        <button class="chip" data-tipo="convivencia">Convivência</button>
+      </div>
+
+      <div class="mapa" id="mapa-campus"></div>
+      <div class="mapa-legenda" id="legenda"></div>
+
+      <section class="card mapa-detalhe" id="detalhe" aria-live="polite"></section>
+
+      <div class="stack-sm">
+        <h4 class="text-muted text-sm">Todos os lugares</h4>
+        <div class="list" id="lista-lugares"></div>
+      </div>
+
+      <a href="orientacao.html?id=ajuda" class="list-item">
+        <span class="icon-badge"><i data-icon="phone"></i></span>
+        <div class="grow"><div class="list-item__title">Contatos oficiais</div><div class="list-item__sub">180, 190 e outros canais, em Orientações</div></div>
+        <i data-icon="chevron-right" class="list-item__chev"></i>
+      </a>
+
+      <div class="callout"><i data-icon="info"></i><span>O desenho é ilustrativo, apenas para a demonstração. A instituição deve confirmar lugares e horários antes do uso real.</span></div>
+    </main>
+  </div>
+
+  <script src="../assets/js/icons.js"></script>
+  <script src="../assets/js/mock-data.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/mapa.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const { esc, icon, campus } = Violet;
+      const mapaEl = document.getElementById("mapa-campus");
+      let sel = null, tipo = "todos";
+
+      const desenharMapa = () => Violet.mapaCampus(mapaEl, {
+        selecionado: sel && sel.id,
+        tipos: tipo === "todos" ? null : [tipo],
+        onSelect: (l) => { sel = l; desenhar(); }
+      });
+
+      const desenhar = () => {
+        desenharMapa();
+        document.getElementById("detalhe").innerHTML = sel ? `
+          <div class="row-between"><h3>${esc(sel.nome)}</h3><span class="badge">${esc(sel.hora)}</span></div>
+          <span class="text-xs text-muted">${esc(campus.tipos[sel.tipo].nome)}</span>
+          <p class="text-sm">${esc(sel.desc)}</p>
+          <a class="btn btn--primary btn--sm" href="circulo-criar.html?ponto=${encodeURIComponent(sel.nome)}">${icon("users", "sm")} Combinar trajeto a partir daqui</a>`
+          : `<p class="text-sm text-muted">Escolha um lugar no mapa para ver os detalhes.</p>`;
+        const lista = campus.lugares.filter((l) => tipo === "todos" || l.tipo === tipo);
+        document.getElementById("lista-lugares").innerHTML = lista.map((l) => `
+          <button type="button" class="list-item" data-id="${l.id}">
+            <span class="icon-badge">${icon(l.tipo === "transporte" ? "navigation" : l.tipo === "apoio" ? "heart" : l.tipo === "seguranca" ? "shield-check" : "map-pin")}</span>
+            <div class="grow"><div class="list-item__title">${esc(l.nome)}</div><div class="list-item__sub">${esc(l.desc)}</div></div>
+            <span class="badge">${esc(l.hora)}</span>
+          </button>`).join("");
+        Violet.renderIcons && Violet.renderIcons(document.querySelector(".screen"));
+      };
+
+      document.getElementById("legenda").innerHTML = Object.values(campus.tipos).map((t) => `<span><i style="border-color:${t.cor}"></i>${esc(t.nome)}</span>`).join("");
+      document.getElementById("filtros").addEventListener("click", (e) => {
+        const b = e.target.closest("[data-tipo]"); if (!b) return;
+        tipo = b.dataset.tipo; if (sel && tipo !== "todos" && sel.tipo !== tipo) sel = null;
+        document.querySelectorAll("#filtros .chip").forEach((c) => c.classList.toggle("is-active", c === b));
+        desenhar();
+      });
+      document.getElementById("lista-lugares").addEventListener("click", (e) => {
+        const b = e.target.closest("[data-id]"); if (!b) return;
+        sel = campus.lugares.find((l) => l.id === b.dataset.id); desenhar(); mapaEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+      sel = campus.lugares.find((l) => l.id === "portaria");
+      desenhar();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#64248c">
+  <title>Conversas · Violet</title>
+  <link rel="icon" href="../assets/img/logo.svg">
+  <script src="../assets/js/theme.js"></script>
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/i18n.js"></script>
+</head>
+<body>
+  <div class="app has-nav" data-nav="conversas">
+    <header class="convo-head">
+      <span class="convo-head__blob convo-head__blob--a" aria-hidden="true"></span>
+      <span class="convo-head__blob convo-head__blob--b" aria-hidden="true"></span>
+      <div class="convo-head__top">
+        <div>
+          
+          <h1>Conversas</h1>
+        </div>
+      </div>
+      <label class="input-wrap convo-search">
+        <i data-icon="search"></i>
+        <input type="search" id="busca" placeholder="Buscar conversas…" aria-label="Buscar conversas">
+      </label>
+    </header>
+
+    <main class="screen" style="gap:var(--sp-4)">
+      <section id="online" class="online" aria-label="Online agora" hidden>
+        <div class="online__title"><span class="online__pulse"></span>Online agora</div>
+        <div class="online__row" id="online-lista"></div>
+      </section>
+      <div class="segmented" role="tablist" aria-label="Filtrar conversas">
+        <button role="tab" class="is-active" data-filtro="todas" aria-selected="true">Todas</button>
+        <button role="tab" data-filtro="grupo" aria-selected="false">Grupos</button>
+      </div>
+      <div id="lista-conversas"></div>
+    </main>
+
+  </div>
+
+  <script src="../assets/js/icons.js"></script>
+  <script src="../assets/js/mock-data.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/pages/conversas.js"></script>
+</body>
+</html>

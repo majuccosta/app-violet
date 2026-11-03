@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#faf7fc">
+  <title>Configurações · Violet</title>
+  <link rel="icon" href="../assets/img/logo.svg">
+  <script src="../assets/js/theme.js"></script>
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/i18n.js"></script>
+</head>
+<body>
+  <div class="app has-nav" data-nav="perfil">
+    <header class="topbar">
+      <button class="icon-btn" id="btn-voltar" aria-label="Voltar"><i data-icon="arrow-left"></i></button>
+      <span class="topbar__title" id="titulo">Configurações</span>
+    </header>
+
+    <main class="screen">
+      <!-- Principal -->
+      <section data-painel="principal" class="stack fade-in">
+        <div class="stack-sm">
+          <h4 class="text-muted text-sm">Notificações</h4>
+          <div class="list-item">
+            <span class="icon-badge"><i data-icon="bell"></i></span><span class="grow list-item__title">Permitir notificações</span>
+            <label class="switch"><input type="checkbox" data-pref="notificacoes"><span></span><span class="sr-only">Permitir notificações</span></label>
+          </div>
+        </div>
+        <div class="stack-sm">
+          <h4 class="text-muted text-sm">Alertas de emergência</h4>
+          <div class="divided-list">
+            <button class="list-item" data-abrir="sons"><span class="icon-badge"><i data-icon="volume"></i></span><span class="grow list-item__title">Sons e vibrações</span><i data-icon="chevron-right" class="list-item__chev"></i></button>
+            <div class="list-item"><span class="icon-badge"><i data-icon="bell-off"></i></span><div class="grow"><div class="list-item__title">Alerta silencioso</div><div class="list-item__sub">Ao acionar a emergência, sem som e sem vibração</div></div><label class="switch"><input type="checkbox" data-disp="alerta_silencioso"><span></span><span class="sr-only">Alerta silencioso</span></label></div>
+          </div>
+        </div>
+        <div class="stack-sm">
+          <h4 class="text-muted text-sm">Discrição</h4>
+          <div class="divided-list">
+            <div class="list-item"><span class="icon-badge"><i data-icon="eye-off"></i></span><div class="grow"><div class="list-item__title">Botão de saída rápida</div><div class="list-item__sub">Fecha o app e abre uma tela neutra na hora</div></div><label class="switch"><input type="checkbox" data-disp="saida_rapida" data-padrao="true"><span></span><span class="sr-only">Botão de saída rápida</span></label></div>
+            <div class="list-item"><span class="icon-badge"><i data-icon="bell"></i></span><div class="grow"><div class="list-item__title">Notificações discretas</div><div class="list-item__sub">Esconde o conteúdo: aparece só “Nova notificação”</div></div><label class="switch"><input type="checkbox" data-disp="notif_discretas"><span></span><span class="sr-only">Notificações discretas</span></label></div>
+          </div>
+        </div>
+        <div class="stack-sm">
+          <h4 class="text-muted text-sm">Privacidade</h4>
+          <div class="divided-list">
+            <button class="list-item" data-abrir="privacidade"><span class="icon-badge"><i data-icon="eye"></i></span><span class="grow list-item__title">Quem pode ver meus dados</span><i data-icon="chevron-right" class="list-item__chev"></i></button>
+            <button class="list-item" data-abrir="bloqueadas"><span class="icon-badge"><i data-icon="x"></i></span><span class="grow list-item__title">Usuárias bloqueadas</span><span class="text-sm text-muted" id="qtd-bloqueadas">0</span><i data-icon="chevron-right" class="list-item__chev"></i></button>
+            <button class="list-item" data-abrir="bloqueio"><span class="icon-badge"><i data-icon="lock"></i></span><span class="grow list-item__title">Bloqueio do aplicativo</span><i data-icon="chevron-right" class="list-item__chev"></i></button>
+          </div>
+        </div>
+        <div class="stack-sm">
+          <h4 class="text-muted text-sm">Geral</h4>
+          <button class="list-item" data-abrir="aparencia"><span class="icon-badge"><i data-icon="sun"></i></span><span class="grow list-item__title">Aparência</span><span class="text-sm text-muted" id="tema-atual">Automático</span><i data-icon="chevron-right" class="list-item__chev"></i></button>
+          <button class="list-item" data-abrir="idioma"><span class="icon-badge"><i data-icon="globe"></i></span><span class="grow list-item__title">Idioma</span><span class="text-sm text-muted" id="idioma-atual">Português (Brasil)</span><i data-icon="chevron-right" class="list-item__chev"></i></button>
+          <a class="list-item" href="conta.html?excluir=1" style="color:var(--danger-600)"><span class="icon-badge" style="color:var(--danger-600)"><i data-icon="trash"></i></span><span class="grow list-item__title" style="color:var(--danger-600)">Excluir minha conta</span><i data-icon="chevron-right" class="list-item__chev"></i></a>
+        </div>
+        <p class="text-center text-xs text-muted">Violet v0.1 · Projeto de extensão CEUB</p>
+      </section>
+
+      <!-- Sons e vibrações -->
+      <section data-painel="sons" class="stack fade-in" hidden>
+        <div class="divided-list">
+          <div class="list-item"><span class="grow list-item__title">Som das notificações</span><label class="switch"><input type="checkbox" data-pref="som"><span></span><span class="sr-only">Som</span></label></div>
+          <div class="list-item"><span class="grow list-item__title">Vibração</span><label class="switch"><input type="checkbox" data-pref="vibracao"><span></span><span class="sr-only">Vibração</span></label></div>
+        </div>
+        <div class="card stack-sm">
+          <div class="row-between"><label class="list-item__title" for="volume">Volume</label><span class="text-sm text-primary fw-600" id="volume-valor">70%</span></div>
+          <div class="row"><i data-icon="volume" data-size="sm"></i><input type="range" class="range" id="volume" min="0" max="100" data-pref="volume"></div>
+        </div>
+        <fieldset class="divided-list" style="border:1px solid var(--line)">
+          <legend class="sr-only">Toque de notificação</legend>
+          <label class="list-item"><span class="grow">Padrão do Violet</span><input type="radio" name="toque" value="padrao" data-pref="toque"></label>
+          <label class="list-item"><span class="grow">Suave</span><input type="radio" name="toque" value="suave" data-pref="toque"></label>
+          <label class="list-item"><span class="grow">Alerta</span><input type="radio" name="toque" value="alerta" data-pref="toque"></label>
+          <label class="list-item"><span class="grow">Discreto</span><input type="radio" name="toque" value="discreto" data-pref="toque"></label>
+        </fieldset>
+      </section>
+
+      <!-- Privacidade: a usuária escolhe quem vê cada dado -->
+      <section data-painel="privacidade" class="stack fade-in" hidden>
+        <p class="lead">Escolha quem pode ver cada informação sua. Toque para alterar.</p>
+        <div class="list" id="lista-privacidade"></div>
+        <div class="stack-sm">
+          <h4 class="text-muted text-sm">Visibilidade</h4>
+          <div class="divided-list">
+            <div class="list-item"><span class="icon-badge"><i data-icon="users"></i></span><div class="grow"><div class="list-item__title">Aparecer no Círculo de Apoio</div><div class="list-item__sub">Usuárias próximas podem te convidar para trajetos</div></div><label class="switch"><input type="checkbox" data-pref="visivel_circulo"><span></span><span class="sr-only">Aparecer no Círculo de Apoio</span></label></div>
+            <div class="list-item"><span class="icon-badge"><i data-icon="incognito"></i></span><div class="grow"><div class="list-item__title">Modo anônimo nas conversas</div><div class="list-item__sub">Seu nome fica oculto para outras usuárias</div></div><label class="switch"><input type="checkbox" data-pref="modo_anonimo"><span></span><span class="sr-only">Modo anônimo</span></label></div>
+          </div>
+        </div>
+        <div class="callout callout--warning"><i data-icon="info"></i><span>O anonimato protege sua identidade no relato e nas conversas, mas o sistema mantém seus dados registrados internamente por segurança, conforme a LGPD.</span></div>
+      </section>
+
+      <!-- Aparência -->
+      <section data-painel="aparencia" class="stack fade-in" hidden>
+        <p class="lead">Escolha como o Violet aparece para você. Essa escolha fica salva neste aparelho.</p>
+        <div class="list" id="lista-tema" role="radiogroup" aria-label="Aparência"></div>
+        <h4 class="text-muted text-sm">Tamanho do texto</h4>
+        <div class="list" id="lista-fonte" role="radiogroup" aria-label="Tamanho do texto"></div>
+        <div class="divided-list">
+          <div class="list-item"><div class="grow"><div class="list-item__title">Reduzir animações</div><div class="list-item__sub">Menos movimento nas telas e nos botões</div></div><label class="switch"><input type="checkbox" data-disp="reduzir"><span></span><span class="sr-only">Reduzir animações</span></label></div>
+        </div>
+      </section>
+
+      <!-- Usuárias bloqueadas -->
+      <section data-painel="bloqueadas" class="stack fade-in" hidden>
+        <p class="lead">Usuárias bloqueadas não aparecem nas suas conversas. Você pode desbloquear quando quiser.</p>
+        <div class="list" id="lista-bloqueadas"></div>
+      </section>
+
+      <!-- Idioma -->
+      <section data-painel="idioma" class="stack fade-in" hidden>
+        <p class="lead">Escolha o idioma do aplicativo.</p>
+        <div class="list" id="lista-idiomas" role="radiogroup" aria-label="Idioma"></div>
+      </section>
+
+      <!-- Bloqueio -->
+      <section data-painel="bloqueio" class="stack fade-in" hidden>
+        <p class="lead">Use um PIN de 4 números para proteger o acesso ao app.</p>
+        <div class="divided-list">
+          <div class="list-item"><span class="icon-badge"><i data-icon="lock"></i></span><span class="grow list-item__title">Usar PIN</span><label class="switch"><input type="checkbox" id="sw-pin"><span></span><span class="sr-only">PIN</span></label></div>
+          <button class="list-item" id="btn-trocar-pin" hidden><span class="icon-badge"><i data-icon="edit"></i></span><span class="grow list-item__title">Alterar PIN</span><i data-icon="chevron-right" class="list-item__chev"></i></button>
+          <div class="list-item"><span class="icon-badge"><i data-icon="fingerprint"></i></span><div class="grow"><div class="list-item__title">Usar biometria</div><div class="list-item__sub">Simulada nesta demonstração</div></div><label class="switch"><input type="checkbox" data-disp="biometria_sim"><span></span><span class="sr-only">Biometria</span></label></div>
+        </div>
+        <div class="callout"><i data-icon="shield"></i><span>O botão de emergência continua acessível mesmo com o app bloqueado.</span></div>
+      </section>
+    </main>
+
+    <!-- Criar / confirmar PIN -->
+    <div class="sheet-backdrop" id="sheet-pin" role="dialog" aria-modal="true" aria-labelledby="pin-titulo">
+      <div class="sheet stack">
+        <div class="sheet__handle"></div>
+        <div class="stack-sm"><h3 id="pin-titulo">Crie um PIN</h3><p class="text-sm text-muted" id="pin-desc"></p></div>
+        <div class="field">
+          <div class="input-wrap"><input id="pin-input" type="password" inputmode="numeric" autocomplete="off" maxlength="4" pattern="[0-9]*" placeholder="••••" aria-label="PIN de 4 números" style="text-align:center;letter-spacing:.5em;font-size:1.4rem"></div>
+          <span class="field__hint" id="pin-erro" style="color:var(--danger-600);min-height:1.2em"></span>
+        </div>
+        <button class="btn btn--primary" id="pin-ok">Continuar</button>
+        <button class="btn btn--soft" id="pin-cancelar">Cancelar</button>
+      </div>
+    </div>
+
+    <!-- Escolha de opção (privacidade) -->
+    <div class="sheet-backdrop" id="sheet-opcao" role="dialog" aria-modal="true" aria-labelledby="opcao-titulo">
+      <div class="sheet stack">
+        <div class="sheet__handle"></div>
+        <div class="stack-sm">
+          <h3 id="opcao-titulo">Quem pode ver</h3>
+          <p class="text-sm text-muted" id="opcao-desc"></p>
+        </div>
+        <div class="list" id="opcao-lista" role="radiogroup"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/icons.js"></script>
+  <script src="../assets/js/mock-data.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/pages/configuracoes.js"></script>
+</body>
+</html>

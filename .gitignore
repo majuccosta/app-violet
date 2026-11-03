@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Django
+backend/.env
+backend/media/
+backend/staticfiles/
+*.sqlite3
+
+# IA (pesos de modelo costumam passar do limite do GitHub)
+ia/modelos/
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+node_modules/

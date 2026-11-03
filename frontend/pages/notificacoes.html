@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#faf7fc">
+  <title>Notificações · Violet</title>
+  <link rel="icon" href="../assets/img/logo.svg">
+  <script src="../assets/js/theme.js"></script>
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/i18n.js"></script>
+</head>
+<body>
+  <div class="app has-nav" data-nav="inicio">
+    <header class="topbar">
+      <a class="icon-btn" href="home.html" aria-label="Voltar para o início"><i data-icon="arrow-left"></i></a>
+      <span class="topbar__title">Notificações</span>
+      <button class="icon-btn" id="btn-lidas" aria-label="Marcar todas como lidas"><i data-icon="check"></i></button>
+    </header>
+    <main class="screen">
+      <div class="stack-sm" id="lista"></div>
+    </main>
+  </div>
+
+  <script src="../assets/js/icons.js"></script>
+  <script src="../assets/js/mock-data.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const { api, esc, icon, toast } = Violet;
+      const icones = { mensagem: "message", denuncia: "file-text", contato: "heart" };
+      const links = { mensagem: "conversas.html", denuncia: "historico.html", contato: "rede.html" };
+      const lista = document.getElementById("lista");
+      const itens = await api.listarNotificacoes();
+      const render = () => lista.innerHTML = itens.map((n) => `
+        <a href="${links[n.tipo] || "#"}" class="notif ${n.lida ? "" : "is-unread"}">
+          <span class="icon-badge icon-badge--round" style="width:40px;height:40px;background:var(--surface)">${icon(icones[n.tipo] || "bell", "sm")}</span>
+          <div class="grow"><div class="notif__title">${esc(n.titulo)}</div><div class="notif__text">${esc(n.texto)}</div></div>
+          <span class="notif__time">${esc(n.hora)}</span>
+        </a>`).join("");
+      render();
+      document.getElementById("btn-lidas").addEventListener("click", () => {
+        itens.forEach((n) => (n.lida = true)); render(); toast("Todas marcadas como lidas.");
+      });
+    });
+  </script>
+</body>
+</html>

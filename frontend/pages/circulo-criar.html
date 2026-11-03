@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#faf7fc">
+  <title>Criar grupo · Violet</title>
+  <link rel="icon" href="../assets/img/logo.svg">
+  <script src="../assets/js/theme.js"></script>
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/i18n.js"></script>
+</head>
+<body>
+  <div class="app has-nav" data-nav="rede">
+    <header class="topbar">
+      <a class="icon-btn" href="circulo.html" aria-label="Voltar para o Círculo de Apoio"><i data-icon="arrow-left"></i></a>
+      <span class="topbar__title">Criar grupo</span>
+      <span></span>
+    </header>
+
+    <main class="screen">
+      <p class="lead">Combine o horário, o ponto de encontro e o destino. Outras usuárias verificadas indo para o mesmo lugar poderão entrar.</p>
+
+      <form id="form-grupo" class="stack" novalidate>
+        <div class="field">
+          <label class="field__label" for="nome">Nome do grupo</label>
+          <div class="input-wrap"><i data-icon="users"></i><input id="nome" name="nome" placeholder="Ex.: Volta da aula de quinta" required data-min="3" maxlength="80"></div>
+          <span class="field__error">Dê um nome ao grupo.</span>
+        </div>
+
+        <div class="card stack">
+          <div class="field">
+            <label class="field__label" for="ponto">Ponto de encontro</label>
+            <div class="input-wrap"><i data-icon="map-pin"></i><input id="ponto" name="ponto" placeholder="Ex.: Portaria principal" required data-min="3"></div>
+            <span class="field__error">Informe o ponto de encontro.</span>
+            <button type="button" class="link text-sm" data-mapa="ponto" style="align-self:flex-start">Escolher no mapa do campus</button>
+          </div>
+          <div class="field">
+            <label class="field__label" for="destino">Destino</label>
+            <div class="input-wrap"><i data-icon="flag"></i><input id="destino" name="destino" placeholder="Ex.: Metrô 112 Sul" required data-min="3"></div>
+            <span class="field__error">Informe o destino.</span>
+            <button type="button" class="link text-sm" data-mapa="destino" style="align-self:flex-start">Escolher no mapa do campus</button>
+          </div>
+        </div>
+
+        <div class="row" style="align-items:flex-start">
+          <div class="field grow">
+            <label class="field__label" for="data">Data</label>
+            <div class="input-wrap"><input id="data" name="data" type="date" required></div>
+            <span class="field__error">Escolha a data.</span>
+          </div>
+          <div class="field" style="width:42%">
+            <label class="field__label" for="hora">Horário</label>
+            <div class="input-wrap"><input id="hora" name="hora" type="time" required></div>
+            <span class="field__error">Escolha o horário.</span>
+          </div>
+        </div>
+        <span class="field__error" id="erro-passado" style="margin-top:-8px">Escolha um horário no futuro.</span>
+
+        <div class="list-item">
+          <div class="grow"><div class="list-item__title">Vagas</div><div class="list-item__sub">Incluindo você</div></div>
+          <div class="counter">
+            <button type="button" data-vagas="-1" aria-label="Menos vagas"><i data-icon="minus" data-size="sm"></i></button>
+            <output id="vagas" aria-live="polite">5</output>
+            <button type="button" data-vagas="1" aria-label="Mais vagas"><i data-icon="plus" data-size="sm"></i></button>
+          </div>
+        </div>
+
+        <div class="list-item">
+          <span class="icon-badge"><i data-icon="navigation"></i></span>
+          <div class="grow"><div class="list-item__title">Compartilhar localização no trajeto</div><div class="list-item__sub">Só com as participantes, por 1 hora a partir do horário</div></div>
+          <label class="switch"><input type="checkbox" id="compartilhar" checked><span></span><span class="sr-only">Compartilhar localização no trajeto</span></label>
+        </div>
+
+        <div class="callout"><i data-icon="shield-check"></i><span>Só usuárias com identidade verificada podem entrar. Combine sempre em locais movimentados e iluminados.</span></div>
+
+        <button type="submit" class="btn btn--primary">Criar grupo</button>
+      </form>
+    </main>
+  </div>
+
+  <div class="sheet-backdrop" id="sheet-mapa" role="dialog" aria-modal="true" aria-labelledby="mapa-titulo">
+    <div class="sheet stack-sm">
+      <div class="sheet__handle"></div>
+      <h3 id="mapa-titulo">Escolher no mapa</h3>
+      <div class="mapa" id="mapa-escolha"></div>
+      <p class="text-sm" id="mapa-nome">Toque em um lugar do mapa.</p>
+      <button type="button" class="btn btn--primary" id="mapa-ok" disabled>Usar este lugar</button>
+      <button type="button" class="btn btn--soft" onclick="Violet.closeSheet('sheet-mapa')">Cancelar</button>
+    </div>
+  </div>
+
+  <script src="../assets/js/icons.js"></script>
+  <script src="../assets/js/mock-data.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/mapa.js"></script>
+  <script src="../assets/js/pages/circulo.js"></script>
+</body>
+</html>

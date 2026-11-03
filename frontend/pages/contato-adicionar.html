@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#faf7fc">
+  <title>Adicionar contato · Violet</title>
+  <link rel="icon" href="../assets/img/logo.svg">
+  <script src="../assets/js/theme.js"></script>
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/i18n.js"></script>
+</head>
+<body>
+  <div class="app has-nav" data-nav="rede">
+    <header class="topbar" style="grid-template-columns:44px 1fr 44px">
+      <button class="icon-btn" type="button" id="btn-topo-voltar" aria-label="Voltar"><i data-icon="arrow-left"></i></button>
+      <span class="topbar__title" id="titulo">Adicionar contato</span>
+      <span></span>
+    </header>
+
+    <div class="wizard" id="wizard-stepper">
+      <div class="stepper" id="stepper" aria-label="Etapas">
+        <span class="stepper__dot">1</span><span class="stepper__bar"></span>
+        <span class="stepper__dot">2</span><span class="stepper__bar" id="bar-3"></span>
+        <span class="stepper__dot" id="dot-3">3</span>
+      </div>
+    </div>
+
+    <main class="screen">
+      <form id="form-contato" class="stack" novalidate style="flex:1">
+
+        <!-- Passo 1: dados básicos -->
+        <section data-passo="1" class="stack">
+          <div class="wizard__intro">
+            <span class="wizard__badge"><i data-icon="user"></i></span>
+            <h2>Quem você quer adicionar?</h2>
+            <p class="lead">Comece pelo nome e pelo telefone. Depois você escolhe como essa pessoa entra na sua rede.</p>
+          </div>
+          <div class="field">
+            <label class="field__label" for="nome">Nome completo</label>
+            <div class="input-wrap"><i data-icon="user"></i><input id="nome" name="nome" placeholder="Nome da pessoa" required data-min="2" autocomplete="off"></div>
+            <span class="field__error">Informe o nome.</span>
+          </div>
+          <div class="field">
+            <label class="field__label" for="telefone">Telefone</label>
+            <div class="input-wrap"><i data-icon="phone"></i><input id="telefone" name="telefone" type="tel" placeholder="(61) 91234-5678" required data-min="14" autocomplete="off"></div>
+            <span class="field__error">Informe um telefone com DDD.</span>
+          </div>
+        </section>
+
+        <!-- Passo 2: contato comum ou de confiança -->
+        <section data-passo="2" class="stack" hidden>
+          <div class="wizard__intro">
+            <span class="wizard__badge wizard__badge--heart"><i data-icon="heart"></i></span>
+            <h2><span class="nome-chip" data-nome-chip>Essa pessoa</span> é de confiança?</h2>
+            <p class="lead">Contatos de confiança podem ser avisados quando você acionar o botão de emergência. Você pode mudar isso depois.</p>
+          </div>
+          <div class="stack-sm" role="radiogroup" aria-label="Tipo de contato">
+            <button type="button" class="choice choice--card" role="radio" aria-checked="false" data-tipo="contato">
+              <span class="choice__icon"><i data-icon="user"></i></span>
+              <span class="grow">
+                <span class="choice__title">Só adicionar aos contatos</span>
+                <span class="choice__sub">Para conversar e montar grupos. Não recebe alertas de emergência.</span>
+              </span>
+              <span class="choice__mark" aria-hidden="true"><i data-icon="check" data-size="sm"></i></span>
+            </button>
+            <button type="button" class="choice choice--card" role="radio" aria-checked="false" data-tipo="confianca" id="op-confianca">
+              <span class="choice__icon choice__icon--heart"><i data-icon="heart"></i></span>
+              <span class="grow">
+                <span class="choice__title">Contato de confiança <span class="badge" id="cota"></span></span>
+                <span class="choice__sub">Pode ser avisada em emergências e ver sua localização, se você permitir.</span>
+              </span>
+              <span class="choice__mark" aria-hidden="true"><i data-icon="check" data-size="sm"></i></span>
+            </button>
+          </div>
+          <div class="callout callout--warning" id="aviso-cota" hidden><i data-icon="alert-circle"></i><span>Você já tem 5 contatos de confiança. Remova um da lista para adicionar outro.</span></div>
+        </section>
+
+        <!-- Passo 3: informações do contato de confiança -->
+        <section data-passo="3" class="stack" hidden>
+          <div class="wizard__intro">
+            <span class="wizard__badge wizard__badge--heart"><i data-icon="shield-check"></i></span>
+            <h2>Informações de <span class="nome-chip" data-nome-chip>confiança</span></h2>
+            <p class="lead">Isso ajuda a avisar essa pessoa do jeito certo, só quando você precisar.</p>
+          </div>
+          <div class="field">
+            <label class="field__label" for="relacao">Relação com você</label>
+            <div class="input-wrap"><i data-icon="users"></i>
+              <select id="relacao" name="relacao" required>
+                <option value="" disabled selected>Selecione uma opção</option>
+                <option>Mãe</option><option>Pai</option><option>Irmã</option><option>Irmão</option>
+                <option>Amiga</option><option>Amigo</option><option>Prima</option><option>Parceiro(a)</option><option>Outro</option>
+              </select>
+              <i data-icon="chevron-down" data-size="sm"></i>
+            </div>
+            <span class="field__error">Selecione a relação.</span>
+          </div>
+          <div class="list-item">
+            <span class="icon-badge"><i data-icon="bell"></i></span>
+            <div class="grow"><div class="list-item__title">Avisar em emergências</div><div class="list-item__sub">Recebe um alerta quando você acionar o SOS</div></div>
+            <label class="switch"><input type="checkbox" id="recebe-alertas" checked><span></span><span class="sr-only">Avisar em emergências</span></label>
+          </div>
+          <div class="list-item">
+            <span class="icon-badge"><i data-icon="map-pin"></i></span>
+            <div class="grow"><div class="list-item__title">Ver minha localização</div><div class="list-item__sub">Somente durante um alerta de emergência</div></div>
+            <label class="switch"><input type="checkbox" id="compartilha" checked><span></span><span class="sr-only">Permitir ver minha localização</span></label>
+          </div>
+        </section>
+
+        <div class="stack-sm push-bottom">
+          <button type="submit" class="btn btn--primary" id="btn-prox">Continuar</button>
+          <button type="button" class="btn btn--ghost" id="btn-sec">Cancelar</button>
+        </div>
+      </form>
+    </main>
+  </div>
+  <script src="../assets/js/icons.js"></script>
+  <script src="../assets/js/mock-data.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/pages/rede.js"></script>
+</body>
+</html>

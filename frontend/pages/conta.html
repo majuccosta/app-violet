@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#faf7fc">
+  <title>Minha conta</title>
+  <link rel="icon" href="../assets/img/logo.svg">
+  <script src="../assets/js/theme.js"></script>
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/i18n.js"></script>
+</head>
+<body>
+  <div class="app has-nav" data-nav="perfil">
+    <header class="topbar">
+      <button class="icon-btn" data-back="perfil.html" aria-label="Voltar"><i data-icon="arrow-left"></i></button>
+      <span class="topbar__title">Minha conta</span>
+      <span></span>
+    </header>
+
+    <main class="screen account">
+      <section class="account-head">
+        <span class="avatar avatar--lg" id="c-iniciais">MJ</span>
+        <div>
+          <h2 id="c-nome">—</h2>
+          <span class="badge badge--success" id="c-verificada" hidden><i data-icon="shield-check" data-size="sm"></i> Identidade verificada</span>
+        </div>
+      </section>
+
+      <form class="card account-card" id="form-dados" novalidate>
+        <h3><i data-icon="user" data-size="sm"></i>Dados pessoais</h3>
+        <div class="field">
+          <label class="field__label" for="c-nome-in">Nome completo</label>
+          <div class="input-wrap"><i data-icon="user"></i><input id="c-nome-in" name="nome" autocomplete="name" required data-min="3"></div>
+          <span class="field__error">Digite seu nome completo.</span>
+        </div>
+        <div class="field">
+          <label class="field__label" for="c-nasc">Data de nascimento</label>
+          <div class="input-wrap"><i data-icon="calendar"></i><input id="c-nasc" name="nascimento" autocomplete="bday"></div>
+        </div>
+        <p class="field__hint" id="dica-bloqueio" hidden><i data-icon="lock" data-size="sm"></i> Nome e data de nascimento vêm do seu documento verificado e não podem ser alterados.</p>
+        <div class="field">
+          <label class="field__label" for="c-email">E-mail</label>
+          <div class="input-wrap is-locked"><i data-icon="mail"></i><input id="c-email" name="email" type="email" readonly><i data-icon="lock" data-size="sm"></i></div>
+          <span class="field__hint">É com ele que você entra no Violet.</span>
+        </div>
+        <div class="field">
+          <label class="field__label" for="c-tel">Telefone</label>
+          <div class="input-wrap"><i data-icon="phone"></i><input id="c-tel" name="telefone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(00) 00000-0000" pattern="\(\d{2}\) \d{4,5}-\d{4}"></div>
+          <span class="field__error">Digite um telefone válido, com DDD.</span>
+        </div>
+        <button type="submit" class="btn btn--primary" id="btn-dados">Salvar alterações</button>
+      </form>
+
+      <form class="card account-card" id="form-end" novalidate>
+        <h3><i data-icon="map-pin" data-size="sm"></i>Endereço</h3>
+        <div class="field">
+          <label class="field__label" for="e-cep">CEP</label>
+          <div class="input-wrap"><i data-icon="map-pin"></i><input id="e-cep" name="cep" inputmode="numeric" autocomplete="postal-code" placeholder="00000-000" maxlength="9" pattern="\d{5}-\d{3}"></div>
+          <span class="field__error">Digite um CEP válido (8 números).</span>
+          <span class="field__hint" id="cep-status">Preenchemos o restante para você.</span>
+        </div>
+        <div class="field">
+          <label class="field__label" for="e-rua">Rua, quadra ou avenida</label>
+          <div class="input-wrap"><input id="e-rua" name="logradouro" autocomplete="address-line1" maxlength="120"></div>
+          <span class="field__error">Informe a rua ou quadra.</span>
+        </div>
+        <div class="account-row">
+          <div class="field">
+            <label class="field__label" for="e-num">Número</label>
+            <div class="input-wrap"><input id="e-num" name="numero" autocomplete="off" maxlength="10" placeholder="S/N"></div>
+            <span class="field__error">Informe o número.</span>
+          </div>
+          <div class="field">
+            <label class="field__label" for="e-comp">Complemento</label>
+            <div class="input-wrap"><input id="e-comp" name="complemento" autocomplete="address-line2" maxlength="60" placeholder="Opcional"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label class="field__label" for="e-bairro">Bairro</label>
+          <div class="input-wrap"><input id="e-bairro" name="bairro" maxlength="80"></div>
+        </div>
+        <div class="account-row account-row--uf">
+          <div class="field">
+            <label class="field__label" for="e-cidade">Cidade</label>
+            <div class="input-wrap"><input id="e-cidade" name="cidade" autocomplete="address-level2" maxlength="80"></div>
+            <span class="field__error">Informe a cidade.</span>
+          </div>
+          <div class="field">
+            <label class="field__label" for="e-uf">Estado</label>
+            <div class="input-wrap"><select id="e-uf" name="uf"><option value="">UF</option><option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option><option>SE</option><option>TO</option></select></div>
+            <span class="field__error">Escolha.</span>
+          </div>
+        </div>
+        <button type="submit" class="btn btn--primary" id="btn-end">Salvar endereço</button>
+      </form>
+
+      <section class="card account-card">
+        <h3><i data-icon="lock" data-size="sm"></i>Segurança</h3>
+        <button type="button" class="list-item account-item" id="abrir-senha"><span class="icon-badge"><i data-icon="lock"></i></span><span class="grow"><span class="list-item__title">Alterar senha</span><span class="list-item__sub">Troque a senha que você usa para entrar</span></span><i data-icon="chevron-right" class="list-item__chev"></i></button>
+      </section>
+
+      <section class="account-danger">
+        <button type="button" class="btn btn--ghost" id="abrir-excluir" style="color:var(--danger-600)"><i data-icon="trash" data-size="sm"></i> Excluir minha conta</button>
+      </section>
+    </main>
+
+    <div class="sheet-backdrop" id="sheet-senha" role="dialog" aria-modal="true" aria-label="Alterar senha">
+      <form class="sheet stack-sm" id="form-senha" novalidate>
+        <div class="sheet__handle"></div>
+        <h3 class="account-sheet__title">Alterar senha</h3>
+        <div class="field">
+          <label class="field__label" for="s-atual">Senha atual</label>
+          <div class="input-wrap"><i data-icon="lock"></i><input id="s-atual" name="atual" type="password" autocomplete="current-password" required>
+            <button type="button" class="icon-btn" data-toggle-password aria-label="Mostrar senha" style="width:32px;height:32px"><i data-icon="eye" data-size="sm"></i></button></div>
+          <span class="field__error">Digite sua senha atual.</span>
+        </div>
+        <div class="field">
+          <label class="field__label" for="s-nova">Nova senha</label>
+          <div class="input-wrap"><i data-icon="lock"></i><input id="s-nova" name="nova" type="password" autocomplete="new-password" placeholder="Mínimo de 8 caracteres" required data-min="8">
+            <button type="button" class="icon-btn" data-toggle-password aria-label="Mostrar senha" style="width:32px;height:32px"><i data-icon="eye" data-size="sm"></i></button></div>
+          <div class="pw-meter" id="pw-meter" data-nivel="0" aria-hidden="true"><span></span><span></span><span></span></div>
+          <span class="field__hint" id="pw-dica">Use 8 ou mais caracteres, com letras e números.</span>
+          <span class="field__error" id="pw-erro">A senha precisa ter pelo menos 8 caracteres.</span>
+        </div>
+        <div class="field">
+          <label class="field__label" for="s-conf">Confirmar nova senha</label>
+          <div class="input-wrap"><i data-icon="lock"></i><input id="s-conf" name="conf" type="password" autocomplete="new-password" required data-match="#s-nova"></div>
+          <span class="field__error">As senhas não são iguais.</span>
+        </div>
+        <button type="submit" class="btn btn--primary" id="btn-senha">Atualizar senha</button>
+        <button type="button" class="btn btn--ghost" onclick="Violet.closeSheet('sheet-senha')">Cancelar</button>
+      </form>
+    </div>
+
+    <div class="sheet-backdrop" id="sheet-excluir" role="dialog" aria-modal="true" aria-label="Excluir conta">
+      <form class="sheet stack-sm" id="form-excluir" novalidate>
+        <div class="sheet__handle"></div>
+        <h3 class="account-sheet__title" style="color:var(--danger-600)">Excluir minha conta</h3>
+        <p class="text-sm text-muted">Essa ação apaga seus dados, denúncias, contatos e conversas e não pode ser desfeita. Para confirmar, digite sua senha.</p>
+        <div class="field">
+          <label class="field__label" for="x-senha">Senha</label>
+          <div class="input-wrap"><i data-icon="lock"></i><input id="x-senha" name="senha" type="password" autocomplete="current-password" required>
+            <button type="button" class="icon-btn" data-toggle-password aria-label="Mostrar senha" style="width:32px;height:32px"><i data-icon="eye" data-size="sm"></i></button></div>
+          <span class="field__error">Digite sua senha para confirmar.</span>
+        </div>
+        <button type="submit" class="btn btn--danger" id="btn-excluir">Excluir definitivamente</button>
+        <button type="button" class="btn btn--ghost" onclick="Violet.closeSheet('sheet-excluir')">Cancelar</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="../assets/js/icons.js"></script>
+  <script src="../assets/js/mock-data.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/pages/conta.js"></script>
+</body>
+</html>

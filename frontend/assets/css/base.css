@@ -1,0 +1,144 @@
+/* ==========================================================
+   VIOLET — Base: reset, tipografia e estrutura do app
+   ========================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; padding: 0; }
+
+html { -webkit-text-size-adjust: 100%; scrollbar-gutter: stable; }
+
+body {
+  font-family: var(--font-body);
+  font-size: var(--fs-md);
+  line-height: 1.5;
+  color: var(--ink-900);
+  background: var(--page-bg);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+}
+
+img, svg { display: block; max-width: 100%; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; background: none; border: 0; }
+a { color: inherit; text-decoration: none; }
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  line-height: 1.2;
+  color: var(--ink-900);
+  letter-spacing: -0.01em;
+}
+h1 { font-size: var(--fs-2xl); font-weight: 700; }
+h2 { font-size: var(--fs-xl); font-weight: 600; }
+h3 { font-size: var(--fs-lg); font-weight: 600; }
+h4 { font-size: var(--fs-md); font-weight: 600; }
+
+:focus-visible {
+  outline: 3px solid var(--violet-300);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+/* ---------- Estrutura do app (mobile first) ---------- */
+.app {
+  position: relative;
+  width: 100%;
+  max-width: var(--app-w);
+  min-height: 100dvh;
+  margin: 0 auto;
+  background:
+    radial-gradient(60% 40% at 100% 0%, var(--app-glow-1) 0%, transparent 70%),
+    radial-gradient(55% 35% at 0% 30%, var(--app-glow-2) 0%, transparent 70%),
+    var(--bg);
+  background-attachment: local;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* Em telas grandes o app aparece como um aparelho centralizado */
+@media (min-width: 640px) {
+  body { padding: 32px 0; background: var(--page-bg-wide); }
+  .app {
+    min-height: calc(100dvh - 64px);
+    max-height: 900px;
+    border-radius: 36px;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden auto;
+  }
+}
+
+.screen {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: var(--sp-5) var(--sp-5) var(--sp-8);
+  gap: var(--sp-5);
+}
+/* Respiro entre a barra do topo e o primeiro conteúdo da tela */
+.topbar ~ .screen { padding-top: var(--sp-6); }
+.app.has-nav .screen { padding-bottom: calc(var(--nav-h) + var(--nav-gap) + var(--sp-8)); }
+.app.has-nav[data-sos] .screen { padding-bottom: calc(var(--nav-h) + var(--nav-gap) + 104px); }
+
+/* Entrada suave da tela */
+.screen { animation: screenIn .22s ease-out both; }
+@keyframes screenIn { from { opacity: 0; } to { opacity: 1; } }
+body.is-leaving .screen, body.is-leaving .topbar, body.is-leaving .convo-head { opacity: 0; transition: opacity .16s ease-in; }
+
+.screen--center { justify-content: center; align-items: center; text-align: center; }
+.screen--dark { background: var(--violet-900); color: #fff; }
+.screen--dark h1, .screen--dark h2 { color: #fff; }
+
+.stack { display: flex; flex-direction: column; gap: var(--sp-4); }
+.stack-sm { display: flex; flex-direction: column; gap: var(--sp-2); }
+.row { display: flex; align-items: center; gap: var(--sp-3); }
+.row-between { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3); }
+.grow { flex: 1; min-width: 0; }
+.push-bottom { margin-top: auto; }
+
+.text-muted { color: var(--ink-500); }
+.text-sm { font-size: var(--fs-sm); }
+.text-xs { font-size: var(--fs-xs); }
+.text-center { text-align: center; }
+.text-primary { color: var(--violet-600); }
+.fw-600 { font-weight: 600; }
+.lead { color: var(--ink-500); font-size: var(--fs-md); }
+
+[hidden] { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+
+/* Evita saltos de largura ao navegar e suaviza mudanças de tema */
+html, body, .app, .screen, .topbar, .card, .list-item, .bottom-nav {
+  transition: background-color .22s ease, color .22s ease, border-color .22s ease;
+}
+img, svg { flex-shrink: 0; }
+@media (max-width: 359px) {
+  .screen { padding-left: var(--sp-4); padding-right: var(--sp-4); }
+  .home-head { gap: 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+/* ---------- Acessibilidade: tamanho do texto e redução de animações ---------- */
+html[data-fonte="grande"] { font-size: 112.5%; }
+html[data-fonte="enorme"] { font-size: 125%; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+html[data-reduzir="1"] *, html[data-reduzir="1"] *::before, html[data-reduzir="1"] *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+
+/* Lista aberta dos campos de seleção (select): acompanha o tema, inclusive no escuro */
+select option, select optgroup { background-color: var(--surface, #fff); color: var(--ink-900, #2a0a3d); }
+select option:checked { background-color: var(--violet-100, #efe3f8); }

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#faf7fc">
+  <title>Sobre o Violet</title>
+  <link rel="icon" href="../assets/img/logo.svg">
+  <script src="../assets/js/theme.js"></script>
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/i18n.js"></script>
+</head>
+<body>
+  <div class="app has-nav" data-nav="perfil">
+    <header class="topbar"><a class="icon-btn" href="perfil.html" aria-label="Voltar para o perfil"><i data-icon="arrow-left"></i></a><span class="topbar__title">Sobre o Violet</span><span></span></header>
+
+    <main class="screen about">
+      <section class="about-hero">
+        <img src="../assets/img/logo-violet.png" data-src-dark="../assets/img/logo-violet-dark.png" alt="Violet" class="about-hero__logo">
+        <p>Segurança feminina no ambiente acadêmico</p>
+      </section>
+
+      <section class="card about-why" aria-labelledby="ab-why">
+        <h2 id="ab-why">Por que o Violet existe</h2>
+        <p>Muitas estudantes enfrentam situações de risco no campus, principalmente à noite, e acabam não denunciando: falta de provas, medo de represálias e pouca confiança nas instituições. O Violet nasceu para que nenhuma delas fique sozinha — um espaço só para mulheres, com identidade verificada, onde dá para pedir ajuda, denunciar e se apoiar.</p>
+      </section>
+
+      <section class="about-duo" aria-label="Missão e visão">
+        <article class="about-card about-card--pink">
+          <h2><i data-icon="hand-heart" data-size="sm"></i>Nossa missão</h2>
+          <p>Oferecer suporte, informações e ferramentas para prevenir e combater a violência contra mulheres, com tecnologia e rede de apoio.</p>
+        </article>
+        <article class="about-card about-card--lilac">
+          <h2><i data-icon="eye" data-size="sm"></i>Nossa visão</h2>
+          <p>Ser referência em segurança e apoio para mulheres, contribuindo para um futuro mais justo, seguro e igualitário.</p>
+        </article>
+      </section>
+
+      <section class="about-card about-card--peach" aria-labelledby="ab-val">
+        <h2 id="ab-val"><i data-icon="sparkles" data-size="sm"></i>Nossos valores</h2>
+        <div class="about-chips">
+          <span>Respeito</span><span>Empatia</span><span>Solidariedade</span><span>Inclusão</span><span>Proteção</span>
+        </div>
+      </section>
+
+      <section class="about-team" id="equipe" aria-labelledby="ab-team" hidden>
+        <h2 id="ab-team">Quem faz o Violet</h2>
+        <p class="text-sm text-muted">Projeto de extensão do CEUB, desenvolvido por:</p>
+        <div class="about-team__grid" id="equipe-lista"></div>
+      </section>
+
+      <footer class="about-foot">
+        <nav class="divided-list" aria-label="Documentos">
+          <a href="termos.html" class="list-item"><span class="icon-badge"><i data-icon="file-text"></i></span><span class="grow list-item__title">Termos de uso</span><i data-icon="chevron-right" class="list-item__chev"></i></a>
+          <a href="politica.html" class="list-item"><span class="icon-badge"><i data-icon="lock"></i></span><span class="grow list-item__title">Política de privacidade</span><i data-icon="chevron-right" class="list-item__chev"></i></a>
+          <a href="boas-vindas.html?rever=1" class="list-item"><span class="icon-badge"><i data-icon="sparkles"></i></span><span class="grow list-item__title">Ver tutorial de boas-vindas</span><i data-icon="chevron-right" class="list-item__chev"></i></a>
+        </nav>
+        <p class="text-center text-xs text-muted">Violet v0.1 · Projeto de extensão CEUB</p>
+      </footer>
+    </main>
+
+    <!-- Resumo dos termos e da política. Revise o texto com quem responde pelo jurídico do projeto antes de publicar. -->
+    <div class="sheet-backdrop" id="sheet-termos" role="dialog" aria-modal="true" aria-label="Termos de uso">
+      <div class="sheet stack-sm about-sheet">
+        <div class="sheet__handle"></div>
+        <h2>Termos de uso</h2>
+        <div class="about-sheet__body">
+          <p><b>Quem pode usar.</b> O Violet é um espaço exclusivo para mulheres da comunidade acadêmica, com identidade verificada por documento oficial.</p>
+          <p><b>Respeito acima de tudo.</b> Não é permitido assediar, ameaçar, expor ou discriminar outras usuárias.</p>
+          <p><b>Uso responsável.</b> O botão de emergência e as denúncias são para situações reais. Denúncias falsas podem levar à suspensão da conta.</p>
+          <p><b>Sua conta.</b> Você é responsável por manter seu acesso protegido e pode encerrar a conta quando quiser.</p>
+          <p><b>Limites do app.</b> O Violet complementa, e não substitui, os serviços oficiais de emergência (190) e a Central de Atendimento à Mulher (180).</p>
+        </div>
+        <button class="btn btn--soft" onclick="Violet.closeSheet('sheet-termos')">Fechar</button>
+      </div>
+    </div>
+    <div class="sheet-backdrop" id="sheet-privacidade" role="dialog" aria-modal="true" aria-label="Política de privacidade">
+      <div class="sheet stack-sm about-sheet">
+        <div class="sheet__handle"></div>
+        <h2>Política de privacidade</h2>
+        <div class="about-sheet__body">
+          <p><b>O que guardamos.</b> Dados de cadastro, documento usado na verificação e o que você registra no app, como denúncias, contatos e conversas.</p>
+          <p><b>Localização.</b> Só é compartilhada quando você aciona o botão de emergência ou durante um trajeto do Círculo de Apoio, e apenas com quem você escolheu.</p>
+          <p><b>Denúncias.</b> Seu nome não aparece no relato. Por segurança, o sistema mantém seus dados registrados internamente.</p>
+          <p><b>Proteção.</b> Seus dados são criptografados e não são vendidos nem compartilhados para fins comerciais.</p>
+          <p><b>Seus direitos (LGPD).</b> Você pode pedir acesso, correção ou exclusão dos seus dados a qualquer momento.</p>
+        </div>
+        <button class="btn btn--soft" onclick="Violet.closeSheet('sheet-privacidade')">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/icons.js"></script>
+  <script src="../assets/js/mock-data.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/pages/sobre.js"></script>
+</body>
+</html>

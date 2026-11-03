@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#64248c">
+  <title>Criar conta · Violet</title>
+  <link rel="icon" href="../assets/img/logo.svg">
+  <script src="../assets/js/theme.js"></script>
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/i18n.js"></script>
+</head>
+<body>
+  <div class="app">
+    <header class="auth-head">
+      <img src="../assets/img/logo.svg" alt="Violet">
+      <h1>Crie sua conta</h1>
+      <p>Vamos começar! Preencha seus dados para criar seu perfil no Violet.</p>
+    </header>
+
+    <main class="screen" style="padding-top:0">
+      <form id="form-cadastro" class="stack" novalidate>
+        <div class="field">
+          <label class="field__label" for="nome">Nome completo</label>
+          <div class="input-wrap">
+            <i data-icon="user"></i>
+            <input id="nome" name="nome" type="text" autocomplete="name" placeholder="Digite seu nome" required data-min="3">
+          </div>
+          <span class="field__error">Informe seu nome completo.</span>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="email">E-mail</label>
+          <div class="input-wrap">
+            <i data-icon="mail"></i>
+            <input id="email" name="email" type="email" autocomplete="email" placeholder="seuemail@instituicao.edu.br" required>
+          </div>
+          <span class="field__error">Informe um e-mail válido.</span>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="senha">Senha</label>
+          <div class="input-wrap">
+            <i data-icon="lock"></i>
+            <input id="senha" name="senha" type="password" autocomplete="new-password" placeholder="Mínimo de 8 caracteres" required data-min="8">
+            <button type="button" class="icon-btn" data-toggle-password aria-label="Mostrar senha" style="width:32px;height:32px"><i data-icon="eye" data-size="sm"></i></button>
+          </div>
+          <span class="field__error">A senha precisa ter pelo menos 8 caracteres.</span>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="nascimento">Data de nascimento</label>
+          <div class="input-wrap">
+            <i data-icon="calendar"></i>
+            <input id="nascimento" name="nascimento" type="date" required>
+          </div>
+          <span class="field__error">Informe sua data de nascimento.</span>
+        </div>
+
+        <div class="field">
+          <label class="check">
+            <input type="checkbox" name="termos" required>
+            <span>Eu aceito os <a href="termos.html" class="link" target="_blank" rel="noopener">Termos de Uso</a> e a <a href="politica.html" class="link" target="_blank" rel="noopener">Política de Privacidade</a> do Violet, em conformidade com a LGPD.</span>
+          </label>
+          <span class="field__error">Você precisa aceitar os termos para continuar.</span>
+        </div>
+
+        <button type="submit" class="btn btn--primary">Continuar <i data-icon="arrow-right" data-size="sm"></i></button>
+      </form>
+
+      <div class="divider-text">ou cadastre-se com</div>
+      <div class="social">
+        <button type="button" aria-label="Cadastrar com Google" data-social="Google"><i data-icon="google"></i></button>
+        <button type="button" aria-label="Cadastrar com Apple" data-social="Apple"><i data-icon="apple"></i></button>
+        <button type="button" aria-label="Cadastrar com Facebook" data-social="Facebook"><i data-icon="facebook"></i></button>
+      </div>
+
+      <p class="text-center text-sm text-muted">Já tem uma conta? <a href="login.html" class="link">Entrar</a></p>
+    </main>
+  </div>
+
+  <script src="../assets/js/icons.js"></script>
+  <script src="../assets/js/mock-data.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/pages/auth.js"></script>
+</body>
+</html>

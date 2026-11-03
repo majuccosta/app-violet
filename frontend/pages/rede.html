@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#faf7fc">
+  <title>Minha rede de apoio · Violet</title>
+  <link rel="icon" href="../assets/img/logo.svg">
+  <script src="../assets/js/theme.js"></script>
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/i18n.js"></script>
+</head>
+<body>
+  <div class="app has-nav" data-nav="rede">
+    <header class="topbar">
+      <span></span>
+      <span class="topbar__title">Minha rede de apoio</span>
+      <span></span>
+    </header>
+
+    <main class="screen">
+      <p class="lead">Pessoas de confiança que podem ser avisadas quando você precisar. Outros contatos ficam só para conversar.</p>
+
+      <section>
+        <div class="section-title"><h3>Contatos de confiança</h3><span class="text-xs text-muted" id="total-contatos"></span></div>
+        <div class="list" id="lista-contatos"></div>
+      </section>
+
+      <section id="sec-outros" hidden>
+        <div class="section-title"><h3>Outros contatos</h3><span class="text-xs text-muted" id="total-outros"></span></div>
+        <div class="list" id="lista-outros"></div>
+      </section>
+
+      <a href="contato-adicionar.html" class="btn btn--soft"><i data-icon="plus" data-size="sm"></i> Adicionar contato</a>
+
+      <a href="circulo.html" class="list-item">
+        <span class="icon-badge"><i data-icon="users"></i></span>
+        <div class="grow"><div class="list-item__title">Círculo de Apoio</div><div class="list-item__sub">Faça trajetos acompanhada de outras usuárias</div></div>
+        <i data-icon="chevron-right" class="list-item__chev"></i>
+      </a>
+    </main>
+  </div>
+
+  <script src="../assets/js/icons.js"></script>
+  <script src="../assets/js/mock-data.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/pages/rede.js"></script>
+</body>
+</html>

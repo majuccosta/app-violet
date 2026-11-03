@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#faf7fc">
+  <title>Fazer denúncia · Violet</title>
+  <link rel="icon" href="../assets/img/logo.svg">
+  <script src="../assets/js/theme.js"></script>
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/i18n.js"></script>
+</head>
+<body>
+  <div class="app has-nav" data-nav="denunciar">
+    <header class="topbar" id="topbar">
+      <span aria-hidden="true" style="width:44px"></span>
+      <span class="topbar__title">Fazer denúncia</span>
+      <span></span>
+    </header>
+
+    <div id="stepper-wrap">
+      <div class="stepper" id="stepper" aria-label="Etapas da denúncia">
+        <span class="stepper__dot">1</span><span class="stepper__bar"></span>
+        <span class="stepper__dot">2</span><span class="stepper__bar"></span>
+        <span class="stepper__dot">3</span><span class="stepper__bar"></span>
+        <span class="stepper__dot">4</span>
+      </div>
+    </div>
+
+    <main class="screen">
+      <form id="form-denuncia" class="stack" style="flex:1" novalidate>
+        <!-- 1. Categoria -->
+        <section data-step="1" class="stack fade-in">
+          <div class="stack-sm">
+            <h2>O que aconteceu?</h2>
+            <p class="lead">Selecione a categoria que mais se aproxima.</p>
+          </div>
+          <div class="tiles" id="categorias" role="radiogroup" aria-label="Categoria"></div>
+          <div class="callout"><i data-icon="incognito"></i><span>Sua identidade não aparece no relato. Ela fica protegida no sistema apenas por segurança.</span></div>
+        </section>
+
+        <!-- 2. Detalhes -->
+        <section data-step="2" class="stack fade-in" hidden>
+          <div class="stack-sm">
+            <h2>Onde e quando?</h2>
+            <p class="lead">Conte o máximo que se sentir confortável.</p>
+          </div>
+          <div class="field">
+            <label class="field__label" for="local">Local da ocorrência</label>
+            <div class="input-wrap"><i data-icon="map-pin"></i><input id="local" name="local" placeholder="Ex.: Prédio A, sala 203, corredor" required></div>
+            <span class="field__error">Informe o local.</span>
+          </div>
+          <div class="row" style="align-items:flex-start">
+            <div class="field grow">
+              <label class="field__label" for="data">Data</label>
+              <div class="input-wrap"><input id="data" name="data" type="date" required></div>
+              <span class="field__error">Informe a data.</span>
+            </div>
+            <div class="field" style="width:42%">
+              <label class="field__label" for="hora">Horário</label>
+              <div class="input-wrap"><input id="hora" name="hora" type="time"></div>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field__label" for="envolvido">Quem estava envolvido?</label>
+            <div class="input-wrap"><i data-icon="user"></i>
+              <select id="envolvido" name="envolvido">
+                <option value="nao_informado">Prefiro não informar</option>
+                <option value="professor">Professor(a)</option>
+                <option value="funcionario">Funcionário(a)</option>
+                <option value="aluno">Aluno(a)</option>
+                <option value="outro">Outra pessoa</option>
+              </select>
+              <i data-icon="chevron-down" data-size="sm"></i>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field__label" for="descricao">Descreva o que aconteceu</label>
+            <div class="input-wrap input-wrap--textarea"><textarea id="descricao" name="descricao" maxlength="2000" placeholder="Conte com o máximo de detalhes possível…" required data-min="10"></textarea></div>
+            <div class="row-between"><span class="field__error">Escreva pelo menos 10 caracteres.</span><span class="field__hint" id="contador" style="margin-left:auto">0/2000</span></div>
+          </div>
+        </section>
+
+        <!-- 3. Evidências -->
+        <section data-step="3" class="stack fade-in" hidden>
+          <div class="stack-sm">
+            <h2>Evidências <span class="badge">opcional</span></h2>
+            <p class="lead">Prints, fotos, áudios, vídeos ou documentos.</p>
+          </div>
+          <label class="dropzone">
+            <span class="icon-badge"><i data-icon="paperclip"></i></span>
+            <span class="grow"><span class="fw-600 text-primary">Adicionar arquivos</span><br><span class="text-xs text-muted">Imagem, áudio, vídeo ou PDF · até 25 MB cada</span></span>
+            <input type="file" id="evidencias" multiple accept="image/*,audio/*,video/*,application/pdf" class="sr-only">
+          </label>
+          <div class="stack-sm" id="lista-arquivos"></div>
+          <div class="callout callout--info"><i data-icon="sparkles"></i><span>Cada evidência passa por uma análise de apoio com inteligência artificial. O resultado ajuda a equipe, mas <strong>não comprova</strong> a ocorrência: a avaliação final é sempre humana.</span></div>
+          <div class="list-item">
+            <span class="icon-badge"><i data-icon="incognito"></i></span>
+            <div class="grow"><div class="list-item__title">Denúncia anônima</div><div class="list-item__sub">Seu nome não aparece no relato</div></div>
+            <label class="switch"><input type="checkbox" id="anonima" checked><span></span><span class="sr-only">Denúncia anônima</span></label>
+          </div>
+        </section>
+
+        <!-- 4. Revisão -->
+        <section data-step="4" class="stack fade-in" hidden>
+          <div class="stack-sm">
+            <h2>Revise suas informações</h2>
+            <p class="lead">Confira antes de enviar.</p>
+          </div>
+          <dl class="summary" id="resumo"></dl>
+        </section>
+
+        <div class="stack-sm push-bottom" id="acoes">
+          <button type="button" class="btn btn--primary" id="btn-proximo" disabled>Próximo</button>
+          <p class="text-center text-xs text-muted" id="dica-revisar">Você poderá revisar tudo antes de enviar.</p>
+        </div>
+      </form>
+
+      <!-- 5. Enviada -->
+      <section id="sucesso" class="stack fade-in" hidden style="flex:1;align-items:center;justify-content:center;text-align:center">
+        <div class="result-icon"><i data-icon="check" data-size="xl"></i></div>
+        <h1>Denúncia registrada!</h1>
+        <p class="lead">Ela será encaminhada para análise com sigilo.</p>
+        <div class="protocol"><span class="text-xs text-muted">PROTOCOLO</span><strong id="protocolo">—</strong></div>
+        <p class="text-xs text-muted" style="max-width:260px">Guarde o protocolo para acompanhar o andamento no histórico de denúncias.</p>
+        <div class="stack-sm" style="width:100%;margin-top:var(--sp-4)">
+          <a href="home.html" class="btn btn--primary">Voltar ao início</a>
+          <a href="historico.html" class="btn btn--soft">Ver histórico</a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../assets/js/icons.js"></script>
+  <script src="../assets/js/mock-data.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/pages/denuncia.js"></script>
+</body>
+</html>

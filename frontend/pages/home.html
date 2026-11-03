@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#faf7fc">
+  <title>Início · Violet</title>
+  <link rel="icon" href="../assets/img/logo.svg">
+  <script src="../assets/js/theme.js"></script>
+  <link rel="stylesheet" href="../assets/css/tokens.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <script src="../assets/js/i18n.js"></script>
+</head>
+<body>
+  <div class="app has-nav" data-nav="inicio" data-sos>
+    <header class="home-hero">
+      <span class="convo-head__blob convo-head__blob--a" aria-hidden="true"></span>
+      <span class="convo-head__blob convo-head__blob--b" aria-hidden="true"></span>
+      <div class="home-hero__top">
+        <img src="../assets/img/logo-violet.png" data-src-dark="../assets/img/logo-violet-dark.png" alt="Violet" class="brand-logo">
+        <div class="home-hero__actions">
+          <button type="button" class="theme-toggle theme-toggle--app" data-quick-exit aria-label="Saída rápida: abre uma tela neutra" title="Saída rápida"><i data-icon="eye-off"></i></button>
+          <button type="button" class="theme-toggle theme-toggle--app" data-theme-toggle aria-pressed="false" aria-label="Alternar entre tema claro e escuro" title="Alternar tema"><i data-icon="moon" class="ico-moon"></i><i data-icon="sun" class="ico-sun"></i></button>
+          <a href="notificacoes.html" class="icon-btn bell" aria-label="Notificações">
+            <i data-icon="bell"></i><span class="badge-dot" id="bell-dot" hidden></span>
+          </a>
+        </div>
+      </div>
+      <div class="home-hero__greet">
+        <p class="home-hero__date" id="data-hoje"></p>
+        <h1><span id="saudacao">Olá</span>,<br><span id="nome-usuaria" class="greeting__nome">Maria Júlia</span>!</h1>
+      </div>
+    </header>
+
+    <main class="screen home-main">
+      <section class="card guard" id="guard" aria-labelledby="guard-titulo">
+        <div class="guard__head">
+          <span class="guard__ico" id="guard-ico"><i data-icon="shield-check" data-size="sm"></i></span>
+          <h3 id="guard-titulo">Você está protegida</h3>
+        </div>
+        <div class="guard__chips">
+          <button type="button" class="guard__chip" id="chip-local" aria-pressed="false"><i data-icon="map-pin" data-size="sm"></i><span class="guard__label">Localização</span><b class="guard__value" id="v-local">—</b></button>
+          <a href="rede.html" class="guard__chip" id="chip-rede"><i data-icon="heart" data-size="sm"></i><span class="guard__label">Confiança</span><b class="guard__value" id="v-rede">—</b></a>
+          <button type="button" class="guard__chip" id="chip-anon" aria-pressed="false"><i data-icon="incognito" data-size="sm"></i><span class="guard__label">Anônimo</span><b class="guard__value" id="v-anon">—</b></button>
+        </div>
+      </section>
+
+      <section class="trip" id="trip" aria-live="polite"></section>
+
+      <nav class="tiles" aria-label="Atalhos">
+        <a href="pontos-seguros.html" class="tile tile--pink"><span class="tile__ico"><i data-icon="map-pin"></i></span><span class="tile__title">Pontos seguros</span><span class="tile__sub">Locais de apoio no campus</span></a>
+        <a href="historico.html" class="tile tile--peach"><span class="tile__ico"><i data-icon="file-text"></i></span><span class="tile__title">Minhas denúncias</span><span class="tile__sub" id="sub-denuncia">Acompanhe o andamento</span></a>
+        <a href="orientacoes.html" class="tile tile--mint"><span class="tile__ico"><i data-icon="book"></i></span><span class="tile__title">Orientações</span><span class="tile__sub">Direitos e como agir</span></a>
+      </nav>
+
+      <section class="card">
+        <div class="section-title">
+          <h3>Conversas</h3>
+          <a href="conversas.html">Ver todas <i data-icon="chevron-right" data-size="sm"></i></a>
+        </div>
+        <div class="home-people" id="lista-pessoas"></div>
+      </section>
+
+      <section class="home-notifs">
+        <div class="section-title">
+          <h3>Notificações</h3>
+          <a href="notificacoes.html">Ver todas <i data-icon="chevron-right" data-size="sm"></i></a>
+        </div>
+        <div class="stack-sm" id="lista-notificacoes"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../assets/js/icons.js"></script>
+  <script src="../assets/js/mock-data.js"></script>
+  <script src="../assets/js/api.js"></script>
+  <script src="../assets/js/app.js"></script>
+  <script src="../assets/js/pages/home.js"></script>
+</body>
+</html>

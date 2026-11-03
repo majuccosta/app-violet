@@ -21,6 +21,15 @@ class AutenticacaoTests(TestCase):
         self.assertEqual(r.status_code, 200)
         self.assertIn("access", r.data)
 
+    def test_token_vencido_nao_bloqueia_cadastro_nem_login(self):
+        c = APIClient()
+        c.credentials(HTTP_AUTHORIZATION="Bearer token.vencido.qualquer")
+        r = c.post("/api/auth/cadastro/", {"nome_completo": "Bia Lima", "email": "bia@ceub.edu.br",
+                                           "senha": SENHA, "data_nascimento": "2003-05-10"}, format="json")
+        self.assertEqual(r.status_code, 201)
+        r = c.post("/api/auth/login/", {"email": "bia@ceub.edu.br", "password": SENHA}, format="json")
+        self.assertEqual(r.status_code, 200)
+
     def test_senha_fraca_e_rejeitada(self):
         r = APIClient().post("/api/auth/cadastro/", {"nome_completo": "X", "email": "x@ceub.edu.br", "senha": "123"}, format="json")
         self.assertEqual(r.status_code, 400)

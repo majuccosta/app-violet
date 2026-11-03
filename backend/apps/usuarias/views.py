@@ -14,6 +14,7 @@ from .services import codigo_valido, enviar_codigo_recuperacao, verificar_docume
 class CadastroView(generics.CreateAPIView):
     """POST /api/auth/cadastro/"""
     serializer_class = CadastroSerializer
+    authentication_classes = []   # não valida token enviado (um token vencido não deve bloquear)
     permission_classes = [permissions.AllowAny]
 
 
@@ -79,6 +80,7 @@ class VerificacaoView(APIView):
 
 class RecuperarSenhaView(APIView):
     """POST /api/auth/recuperar-senha/ — sempre responde igual, para não revelar quais e-mails existem."""
+    authentication_classes = []   # não valida token enviado (um token vencido não deve bloquear)
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
@@ -92,6 +94,7 @@ class RecuperarSenhaView(APIView):
 
 class VerificarCodigoView(APIView):
     """POST /api/auth/verificar-codigo/ — {destino, codigo} -> {valido}"""
+    authentication_classes = []   # não valida token enviado (um token vencido não deve bloquear)
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
@@ -103,6 +106,7 @@ class VerificarCodigoView(APIView):
 
 class NovaSenhaView(APIView):
     """POST /api/auth/nova-senha/ — {destino, codigo, senha}"""
+    authentication_classes = []   # não valida token enviado (um token vencido não deve bloquear)
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):

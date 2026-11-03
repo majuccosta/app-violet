@@ -119,7 +119,8 @@ async function http(path, opts = {}, jaRenovou = false) {
 async function httpBruto(path, { method = "GET", body, form } = {}, jaRenovou = false) {
   const headers = { Accept: "application/json" };
   const token = store.get("token", null);
-  if (token) headers.Authorization = `Bearer ${token}`;
+  // Login, cadastro e recuperação de senha não usam token (um token vencido guardado no navegador faria a API recusar)
+  if (token && !path.startsWith("/auth/")) headers.Authorization = `Bearer ${token}`;
   let payload;
   if (form) payload = form;
   else if (body) { headers["Content-Type"] = "application/json"; payload = JSON.stringify(body); }

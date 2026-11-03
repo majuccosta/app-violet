@@ -5,7 +5,7 @@
    Os caminhos abaixo batem com backend/config/urls.py.
    ========================================================== */
 // Endereço da API publicada (Render). Troque pelo seu depois de publicar, sem barra no final.
-const API_PRODUCAO = "https://violet-api.onrender.com/api";
+const API_PRODUCAO = "https://violet-api-9441.onrender.com/api";
 const API_LOCAL = ["localhost", "127.0.0.1"].includes(location.hostname);
 
 const API_CONFIG = {

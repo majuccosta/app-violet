@@ -67,6 +67,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       toast(`Localização compartilhada por ${minutos >= 60 ? minutos / 60 + " h" : minutos + " min"}.`);
       pintarLocalizacao();
     });
+    document.getElementById("btn-mais")?.addEventListener("click", async () => {
+      try { await Violet.estenderLocalizacao(30); toast("Mais 30 minutos de localização."); } catch (e) { toast(e.message); }
+      pintarLocalizacao();
+    });
     document.getElementById("btn-encerrar").addEventListener("click", async () => {
       await api.encerrarLocalizacao();
       clearInterval(timer);
@@ -283,7 +287,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               : `<div class="card stack-sm" id="card-trajeto">
                    <div class="row"><span class="icon-badge">${icon("route")}</span>
                      <div class="grow"><div class="list-item__title">Trajeto seguro</div><div class="list-item__sub">Compartilha sua localização com o grupo durante o trajeto. Se você não confirmar que chegou, sua rede é avisada.</div></div></div>
-                   ${compartilhando ? `<div class="row share-card" style="padding:var(--sp-3);border-radius:var(--r-md)"><div class="grow"><div class="list-item__title">Localização ativa</div><div class="list-item__sub">Encerra em</div></div><span class="countdown" id="countdown">--:--</span><button class="btn btn--soft btn--sm" id="btn-parar">Encerrar</button></div>` : ""}
+                   ${compartilhando ? `<div class="row share-card" style="padding:var(--sp-3);border-radius:var(--r-md)"><div class="grow"><div class="list-item__title">Localização ativa</div><div class="list-item__sub">Encerra em</div></div><span class="countdown" id="countdown">--:--</span><button class="btn btn--soft btn--sm" id="btn-mais">+30 min</button><button class="btn btn--soft btn--sm" id="btn-parar">Encerrar</button></div>` : ""}
                    <div class="duration">${[[900, "15 min"], [1800, "30 min"], [3600, "1 h"], [20, "20 s (demo)"]].map(([sg, t]) => `<button class="chip ${sg === 1800 ? "is-active" : ""}" data-prazo="${sg}">${t}</button>`).join("")}</div>
                    <button class="btn btn--primary" id="btn-trajeto">Iniciar trajeto</button>
                  </div>`}
@@ -314,6 +318,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         toast("Localização compartilhada com o grupo.");
         desenharGrupo();
       });
+      document.getElementById("btn-mais")?.addEventListener("click", async () => {
+        try { await Violet.estenderLocalizacao(30); toast("Mais 30 minutos de localização."); } catch (e) { toast(e.message); }
+        desenharGrupo();
+      });
       document.getElementById("btn-parar")?.addEventListener("click", async () => {
         await api.encerrarLocalizacao();
         clearInterval(timer);
@@ -337,7 +345,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("btn-trajeto")?.addEventListener("click", async () => {
         await api.iniciarTrajeto({ grupo: g.id, nome: g.nome, segundos: prazo });
         // O trajeto já compartilha a localização com o grupo, pelo mesmo tempo
-        await api.autorizarLocalizacao({ minutos: Math.max(1, Math.ceil(prazo / 60)), grupo: g.id });
+        const ja = await api.obterCompartilhamento();
+        const quer = Math.max(1, Math.ceil(prazo / 60));
+        const resta = ja ? Math.ceil((new Date(ja.expira_em) - Date.now()) / 60000) : 0;
+        if (!ja || resta < quer || String(ja.grupo) !== String(g.id)) await api.autorizarLocalizacao({ minutos: quer, grupo: g.id });
         toast("Trajeto iniciado. Confirme quando chegar 💜");
         window.dispatchEvent(new Event("violet:trajeto"));
         desenharGrupo();
@@ -373,6 +384,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         desenharGrupo();
       }));
     }
+
+    window.addEventListener("violet:trajeto-fim", () => { clearInterval(timerTrajeto); clearInterval(timer); desenharGrupo(); });
 
     document.getElementById("confirmar-sair").addEventListener("click", async () => {
       await api.sairGrupo(id);

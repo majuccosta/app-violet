@@ -36,7 +36,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   /* ---------- Você está protegida ---------- */
   const confianca = contatos.filter((c) => c.de_confianca !== false);
-  const estado = { local: !!prefs.compartilhar_agora, anon: !!prefs.modo_anonimo };
+  const estado = { local: false, ate: null, anon: !!prefs.modo_anonimo };
+  const hhmm = (iso) => new Date(iso).toLocaleTimeString(lang(), { hour: "2-digit", minute: "2-digit" });
+  // A localização é a mesma do Círculo de Apoio: vale por tempo limitado e continua ativa ao trocar de tela
+  const lerLocal = async () => {
+    const c = await seguro(api.obterCompartilhamento(), null);
+    estado.local = !!c; estado.ate = c ? c.expira_em : null;
+  };
+  await lerLocal();
 
   const pintarGuard = () => {
     const protegida = confianca.length > 0;
@@ -44,7 +51,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     $("guard-titulo").textContent = protegida ? "Você está protegida" : "Complete sua proteção";
     $("guard-ico").innerHTML = icon(protegida ? "shield-check" : "shield", "sm");
 
-    $("v-local").textContent = estado.local ? "Ativa" : "Desativada";
+    $("v-local").textContent = estado.local ? `Até ${hhmm(estado.ate)}` : "Desativada";
     $("chip-local").classList.toggle("is-on", estado.local);
     $("chip-local").setAttribute("aria-pressed", estado.local);
 
@@ -57,16 +64,39 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
   pintarGuard();
 
-  $("chip-local").addEventListener("click", async () => {
-    estado.local = !estado.local;
-    pintarGuard();
-    await api.salvarPreferencias({ compartilhar_agora: estado.local });
-    toast(estado.local ? "Localização compartilhada com sua rede." : "Compartilhamento desativado.");
+  let minLocal = 30;
+  const pintarSheetLocal = () => {
+    $("local-off").hidden = estado.local;
+    $("local-on").hidden = !estado.local;
+    if (estado.local) $("local-info").textContent = `Sua rede vê sua localização até as ${hhmm(estado.ate)}. Quer mais tempo?`;
+  };
+  $("chip-local").addEventListener("click", () => { pintarSheetLocal(); Violet.openSheet("sheet-local"); });
+  document.querySelectorAll("#sheet-local [data-min]").forEach((b) => b.addEventListener("click", () => {
+    minLocal = Number(b.dataset.min);
+    document.querySelectorAll("#sheet-local [data-min]").forEach((x) => x.classList.toggle("is-active", x === b));
+  }));
+  $("local-ligar").addEventListener("click", async () => {
+    try { await api.autorizarLocalizacao({ minutos: minLocal }); } catch (e) { toast(e.message); return; }
+    await lerLocal(); pintarGuard(); Violet.closeSheet("sheet-local");
+    toast("Localização compartilhada com sua rede.");
   });
+  $("local-mais").addEventListener("click", async () => {
+    try { await Violet.estenderLocalizacao(30); } catch (e) { toast(e.message); return; }
+    await lerLocal(); pintarGuard(); pintarSheetLocal();
+    toast("Mais 30 minutos de localização.");
+  });
+  $("local-desligar").addEventListener("click", async () => {
+    try { await api.encerrarLocalizacao(); } catch (e) { toast(e.message); return; }
+    await lerLocal(); pintarGuard(); Violet.closeSheet("sheet-local");
+    toast("Compartilhamento desativado.");
+  });
+  // Se o tempo acabar com a tela aberta, o botão volta para "Desativada"
+  setInterval(async () => { if (estado.local && new Date(estado.ate) <= new Date()) { await lerLocal(); pintarGuard(); } }, 15000);
   $("chip-anon").addEventListener("click", async () => {
     estado.anon = !estado.anon;
     pintarGuard();
-    await api.salvarPreferencias({ modo_anonimo: estado.anon });
+    try { await api.salvarPreferencias({ modo_anonimo: estado.anon }); }
+    catch (e) { estado.anon = !estado.anon; pintarGuard(); toast(e.message); return; }
     toast(estado.anon ? "Modo anônimo ativado." : "Modo anônimo desativado.");
   });
 

@@ -136,10 +136,19 @@ async function httpBruto(path, { method = "GET", body, form } = {}, jaRenovou = 
   else if (body) { headers["Content-Type"] = "application/json"; payload = JSON.stringify(body); }
 
   let res;
+  // O servidor grátis "dorme" sem uso e leva até 1 minuto para acordar: avisamos uma vez, em vez de deixar a tela parada
+  const aviso = setTimeout(() => {
+    if (window.Violet && Violet.toast && !window.__avisouServidor) {
+      window.__avisouServidor = true;
+      Violet.toast("O servidor está acordando. Pode levar até 1 minuto na primeira vez 💜", 6000);
+    }
+  }, 6000);
   try {
     res = await fetch(API_CONFIG.BASE_URL + path, { method, headers, body: payload });
   } catch {
     throw new Error("Sem conexão com o servidor. Verifique sua internet e tente novamente.");
+  } finally {
+    clearTimeout(aviso);
   }
   // Token vencido: renova uma vez e repete; se não der, pede login de novo
   if (res.status === 401 && token && !jaRenovou && !path.startsWith("/auth/")) {
@@ -485,7 +494,14 @@ const real = {
   acionarEmergencia: (d) => http(ENDPOINTS.alertas, { method: "POST", body: d }),
   cancelarEmergencia: (id) => http(`${ENDPOINTS.alertas}${id}/cancelar/`, { method: "POST" }),
   listarOrientacoes: () => http(ENDPOINTS.orientacoes),
-  salvarPreferencias: (p) => http(ENDPOINTS.me, { method: "PATCH", body: { preferencias: p } }),
+  // "modo_anonimo" fica no cadastro da usuária (fora de "preferencias"); o resto vai em "preferencias"
+  salvarPreferencias: (p) => {
+    const { modo_anonimo, ...resto } = p || {};
+    const body = {};
+    if (modo_anonimo !== undefined) body.modo_anonimo = modo_anonimo;
+    if (Object.keys(resto).length) body.preferencias = resto;
+    return http(ENDPOINTS.me, { method: "PATCH", body }).then(() => p);
+  },
   atualizarConta: ({ nome, ...resto }) => http(ENDPOINTS.me, { method: "PATCH", body: nome ? { nome_completo: nome, ...resto } : resto }).then((u) => ({ ...u, nome: u.nome_completo })),
   alterarSenha: ({ atual, nova }) => http(ENDPOINTS.senha, { method: "POST", body: { senha_atual: atual, senha_nova: nova } }),
   excluirConta: ({ senha }) => http(ENDPOINTS.excluirConta, { method: "POST", body: { senha } }).then(() => { store.set("token", null); return null; }),
@@ -498,10 +514,12 @@ const real = {
   listarSolicitacoes: () => http(ENDPOINTS.solicitacoes),
   responderSolicitacao: (id, aceita) => http(`${ENDPOINTS.solicitacoes}${id}/responder/`, { method: "POST", body: { aceita } }),
   usuariasProximas: () => http(ENDPOINTS.proximas),
-  obterCompartilhamento: () => http(ENDPOINTS.localizacao).catch(() => null),
+  obterCompartilhamento: () => http(ENDPOINTS.localizacao)
+    .then((c) => (c && !c.encerrado && c.expira_em && new Date(c.expira_em) > new Date() ? c : null))
+    .catch(() => null),
   autorizarLocalizacao: (d) => http(ENDPOINTS.localizacao, { method: "POST", body: d }),
   encerrarLocalizacao: () => http(ENDPOINTS.localizacao, { method: "DELETE" }),
-  obterPreferencias: () => http(ENDPOINTS.me).then((u) => u.preferencias)
+  obterPreferencias: () => http(ENDPOINTS.me).then((u) => ({ ...(u.preferencias || {}), modo_anonimo: !!u.modo_anonimo }))
 };
 
 window.Violet = window.Violet || {};

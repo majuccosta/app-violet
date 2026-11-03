@@ -73,6 +73,30 @@
     </main>
   </div>
 
+  <div class="sheet-backdrop" id="sheet-local" role="dialog" aria-modal="true" aria-labelledby="local-titulo">
+    <div class="sheet stack">
+      <div class="sheet__handle"></div>
+      <div class="icon-badge icon-badge--round" style="width:56px;height:56px"><i data-icon="map-pin"></i></div>
+      <h3 id="local-titulo">Compartilhar sua localização</h3>
+      <div id="local-off" class="stack">
+        <p class="text-sm text-muted">Sua rede de confiança vê onde você está só durante o tempo escolhido. Você pode encerrar antes quando quiser.</p>
+        <div class="duration" role="radiogroup" aria-label="Duração">
+          <button class="chip" data-min="15">15 min</button>
+          <button class="chip is-active" data-min="30">30 min</button>
+          <button class="chip" data-min="60">1 h</button>
+          <button class="chip" data-min="120">2 h</button>
+        </div>
+        <button class="btn btn--primary" id="local-ligar">Compartilhar</button>
+      </div>
+      <div id="local-on" class="stack" hidden>
+        <p class="text-sm text-muted" id="local-info"></p>
+        <button class="btn btn--primary" id="local-mais">Manter por mais 30 min</button>
+        <button class="btn btn--soft" id="local-desligar" style="color:var(--danger-600)">Encerrar compartilhamento</button>
+      </div>
+      <button class="btn btn--ghost" onclick="Violet.closeSheet('sheet-local')">Fechar</button>
+    </div>
+  </div>
+
   <script src="../assets/js/icons.js"></script>
   <script src="../assets/js/mock-data.js"></script>
   <script src="../assets/js/api.js"></script>

@@ -91,6 +91,9 @@ DATABASES = {
         "PORT": env("DB_PORT", "5432"),
         # Bancos na nuvem (Supabase) exigem conexão criptografada: DB_SSLMODE=require
         "OPTIONS": {"sslmode": env("DB_SSLMODE", "prefer")},
+        # Reaproveita a conexão por 60 s em vez de abrir uma nova a cada pedido (muito mais rápido na nuvem)
+        "CONN_MAX_AGE": int(env("DB_CONN_MAX_AGE", "60")),
+        "CONN_HEALTH_CHECKS": True,
     }
 }
 

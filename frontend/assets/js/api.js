@@ -95,6 +95,16 @@ function cacheLimpar() {
   } catch { /* sem cache */ }
 }
 
+/* ---------- Só entra no app quem tem conta ----------
+   Sem login (token), só as páginas públicas abrem; qualquer outra volta para a entrada. */
+if (!API_CONFIG.USE_MOCK) {
+  const PUBLICAS = ["", "index.html", "login.html", "cadastro.html", "recuperar-senha.html", "termos.html", "politica.html", "neutro.html"];
+  const arquivo = location.pathname.split("/").pop();
+  if (!store.get("token", null) && !PUBLICAS.includes(arquivo)) {
+    location.replace(location.pathname.includes("/pages/") ? "login.html" : "pages/login.html");
+  }
+}
+
 async function http(path, opts = {}, jaRenovou = false) {
   const metodo = opts.method || "GET";
   if (metodo !== "GET") {
@@ -533,8 +543,13 @@ if (!API_CONFIG.USE_MOCK) {
   };
   const meusGrupos = async () => ((await real.listarGrupos()) || []).filter((g) => g.membro);
 
+  const primeiroNome = (t) => String(t || "").trim().split(/\s+/)[0].toLowerCase();
+  /* Conversa direta com alguém que também está na minha rede de apoio ganha a etiqueta "Contato de confiança" */
+  const marcaConfianca = (contatos) => (c) => c.tipo === "grupo" ? c
+    : { ...c, de_confianca: (contatos || []).some((x) => primeiroNome(x.nome) === primeiroNome(c.nome) && x.de_confianca !== false) };
   real.listarConversas = async (...a) => {
-    const diretas = ((await _lc(...a)) || []).map(normalizaConversa);
+    const contatos = await real.listarContatos().catch(() => []);
+    const diretas = ((await _lc(...a)) || []).map(normalizaConversa).map(marcaConfianca(contatos));
     const grupos = (await meusGrupos().catch(() => [])).map(conversaDoGrupo);
     return [...diretas, ...grupos].sort((x, y) => (x.min ?? 0) - (y.min ?? 0));
   };
@@ -542,7 +557,9 @@ if (!API_CONFIG.USE_MOCK) {
     if (ehChat(id)) return mock.obterConversa(id);
     if (ehGrupo(id)) { const g = await real.obterGrupo(String(id).slice(1)).catch(() => null); return g ? conversaDoGrupo(g) : undefined; }
     const c = await _oc(id);
-    return c && normalizaConversa(c);
+    if (!c) return c;
+    const contatos = await real.listarContatos().catch(() => []);
+    return marcaConfianca(contatos)(normalizaConversa(c));
   };
   real.listarMensagens = async (id) => {
     if (ehChat(id)) return mock.listarMensagens(id);
@@ -586,6 +603,18 @@ if (!API_CONFIG.USE_MOCK) {
   real.listarOrientacoes = async (...a) => ((await _lo(...a)) || [])
     .slice().sort((x, y) => (x.ordem ?? 0) - (y.ordem ?? 0))
     .map((o) => ({ id: o.slug || o.id, titulo: o.titulo, resumo: o.resumo, icon: o.icone || "help-circle", aviso: o.aviso || "", ...(o.conteudo || {}) }));
+
+  /* A API devolve categoria como código ("ameaca"), data em AAAA-MM-DD e hora com segundos; a tela mostra legível */
+  const _ld = real.listarDenuncias;
+  real.listarDenuncias = async (...a) => ((await _ld(...a)) || []).map((d) => {
+    const [ano, mes, dia] = String(d.data_ocorrencia || "").split("-");
+    return {
+      ...d,
+      categoria: d.categoria_nome || d.categoria,
+      data: d.data || (dia ? `${dia}/${mes}/${ano}` : ""),
+      hora: d.hora || String(d.hora_ocorrencia || "").slice(0, 5)
+    };
+  });
 
   real.listarNotificacoes = async (...a) => ((await _ln(...a)) || []).map((n) => ({
     hora: n.criado_em ? new Date(n.criado_em).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "",

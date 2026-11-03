@@ -126,7 +126,9 @@ INSERT INTO contatos_contatoconfianca (usuaria_id, nome, telefone, relacao, comp
  (1, 'Beatriz Rocha', '(61) 98533-2211', 'Prima', FALSE, TRUE),
  (2, 'Helena Souza',  '(61) 99222-1100', 'Mãe',   TRUE,  TRUE),
  (3, 'Renata Ribeiro','(61) 99333-4455', 'Mãe',   TRUE,  TRUE),
- (5, 'Júlia Mendes',  '(61) 99444-7788', 'Irmã',  TRUE,  TRUE);
+ (5, 'Júlia Mendes',  '(61) 99444-7788', 'Irmã',  TRUE,  TRUE),
+ (1, 'Valentina Souza',   '(61) 99111-0002', 'Amiga', TRUE,  TRUE),
+ (1, 'Ana Clara Mendes',  '(61) 99111-0005', 'Amiga', TRUE,  TRUE);
 
 INSERT INTO emergencia_alertaemergencia (usuaria_id, latitude, longitude, status, ligue180_acionado, criado_em, encerrado_em) VALUES
  (1, -15.766900, -47.892700, 'encerrado', TRUE, '2026-03-20 19:22-03', '2026-03-20 19:41-03'),

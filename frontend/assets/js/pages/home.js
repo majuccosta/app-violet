@@ -134,7 +134,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* ---------- Conversas ---------- */
   $("lista-pessoas").innerHTML = conversas.slice(0, 6).map((c) => `
     <a href="chat.html?id=${c.id}" class="home-person">
-      <span class="home-person__ring${c.online || c.nao_lidas ? " is-live" : ""}">
+      <span class="home-person__ring">
         <span class="avatar${c.tipo === "grupo" ? " avatar--group" : ""}" data-tone="${c.tone}">${c.tipo === "grupo" ? icon("users", "sm") : initials(c.nome)}</span>
       </span>
       ${c.nao_lidas ? `<span class="badge badge--count">${c.nao_lidas}</span>` : ""}

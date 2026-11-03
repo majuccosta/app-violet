@@ -34,5 +34,24 @@
   <script src="../assets/js/mock-data.js"></script>
   <script src="../assets/js/api.js"></script>
   <script src="../assets/js/app.js"></script>
+  <script>
+    /* Aberta pelo cadastro (ou sem conta): "voltar" fecha a aba e volta ao cadastro, nunca para dentro do app */
+    document.addEventListener("DOMContentLoaded", () => {
+      let logada = false;
+      try { logada = !!localStorage.getItem("violet:token"); } catch { /* sem storage */ }
+      const veioDoCadastro = new URLSearchParams(location.search).get("de") === "cadastro";
+      if (logada && !veioDoCadastro) return;
+      const antigo = document.querySelector("[data-back]");
+      if (!antigo) return;
+      const botao = antigo.cloneNode(true);
+      botao.removeAttribute("data-back");
+      botao.setAttribute("aria-label", "Voltar ao cadastro");
+      antigo.replaceWith(botao);
+      botao.addEventListener("click", () => {
+        window.close();                                              // funciona quando a aba foi aberta pelo cadastro
+        setTimeout(() => { location.href = "cadastro.html"; }, 150);  // se não fechar, volta ao cadastro
+      });
+    });
+  </script>
 </body>
 </html>

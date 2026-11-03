@@ -39,4 +39,12 @@ UPDATE orientacoes_orientacao SET resumo='Entenda como ele funciona e quando usa
 -- Grupo de conversa da demonstração: a Maria Júlia (id 1) é a criadora (precisa do migrate com os campos novos)
 UPDATE conversas_conversa SET criadora_id = 1, cor = 2 WHERE id = 5 AND criadora_id IS NULL;
 
+-- Contatos de confiança que também têm conversa (a etiqueta "Contato de confiança" aparece na lista de conversas)
+INSERT INTO contatos_contatoconfianca (usuaria_id, nome, telefone, relacao, compartilha_localizacao, recebe_alertas)
+SELECT 1, 'Valentina Souza', '(61) 99111-0002', 'Amiga', TRUE, TRUE
+WHERE NOT EXISTS (SELECT 1 FROM contatos_contatoconfianca WHERE usuaria_id = 1 AND nome = 'Valentina Souza');
+INSERT INTO contatos_contatoconfianca (usuaria_id, nome, telefone, relacao, compartilha_localizacao, recebe_alertas)
+SELECT 1, 'Ana Clara Mendes', '(61) 99111-0005', 'Amiga', TRUE, TRUE
+WHERE NOT EXISTS (SELECT 1 FROM contatos_contatoconfianca WHERE usuaria_id = 1 AND nome = 'Ana Clara Mendes');
+
 COMMIT;

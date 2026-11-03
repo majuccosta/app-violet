@@ -272,31 +272,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         </section>
 
         ${g.membro ? `
-          <section class="card ${compartilhando ? "share-card" : ""} stack-sm" id="card-local">
-            <div class="row">
-              <span class="icon-badge">${icon("navigation")}</span>
-              <div class="grow">
-                <div class="list-item__title">${compartilhando ? "Localização ativa" : "Compartilhar localização"}</div>
-                <div class="list-item__sub">${compartilhando ? "Só o grupo vê · encerra em" : "Só as participantes veem, pelo tempo que você escolher"}</div>
-              </div>
-              ${compartilhando ? `<span class="countdown" id="countdown">--:--</span>` : ""}
-            </div>
-            ${compartilhando
-              ? `<button class="btn btn--soft" id="btn-parar">Encerrar agora</button>`
-              : `<div class="duration">${[15, 30, 60, 120].map((m) => `<button class="chip ${m === 60 ? "is-active" : ""}" data-min="${m}">${m >= 60 ? m / 60 + " h" : m + " min"}</button>`).join("")}</div>
-                 <button class="btn btn--primary" id="btn-local">Autorizar localização</button>`}
-          </section>
           <div class="stack-sm">
             ${trajetoAtivo
               ? `<div class="card share-card stack-sm" id="card-trajeto">
                    <div class="row"><span class="icon-badge">${icon("route")}</span>
-                     <div class="grow"><div class="list-item__title">Trajeto em andamento</div><div class="list-item__sub">Confirme quando chegar. Sem confirmação, avisamos sua rede em</div></div>
+                     <div class="grow"><div class="list-item__title">Trajeto em andamento</div><div class="list-item__sub">O grupo vê sua localização. Confirme quando chegar; sem confirmação, avisamos sua rede em</div></div>
                      <span class="countdown" id="countdown-trajeto">--:--</span></div>
                    <button class="btn btn--primary" id="btn-cheguei">${icon("check-circle", "sm")} Cheguei bem</button>
                  </div>`
               : `<div class="card stack-sm" id="card-trajeto">
                    <div class="row"><span class="icon-badge">${icon("route")}</span>
-                     <div class="grow"><div class="list-item__title">Trajeto seguro</div><div class="list-item__sub">Defina um prazo. Se você não confirmar que chegou, sua rede é avisada.</div></div></div>
+                     <div class="grow"><div class="list-item__title">Trajeto seguro</div><div class="list-item__sub">Compartilha sua localização com o grupo durante o trajeto. Se você não confirmar que chegou, sua rede é avisada.</div></div></div>
+                   ${compartilhando ? `<div class="row share-card" style="padding:var(--sp-3);border-radius:var(--r-md)"><div class="grow"><div class="list-item__title">Localização ativa</div><div class="list-item__sub">Encerra em</div></div><span class="countdown" id="countdown">--:--</span><button class="btn btn--soft btn--sm" id="btn-parar">Encerrar</button></div>` : ""}
                    <div class="duration">${[[900, "15 min"], [1800, "30 min"], [3600, "1 h"], [20, "20 s (demo)"]].map(([sg, t]) => `<button class="chip ${sg === 1800 ? "is-active" : ""}" data-prazo="${sg}">${t}</button>`).join("")}</div>
                    <button class="btn btn--primary" id="btn-trajeto">Iniciar trajeto</button>
                  </div>`}
@@ -315,7 +302,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         rota: lugarPonto && lugarDestino && lugarPonto.id !== lugarDestino.id ? [lugarPonto.id, lugarDestino.id] : null
       });
 
-      if (compartilhando) contagem(document.getElementById("countdown"), c.expira_em, desenharGrupo);
+      if (compartilhando && !trajetoAtivo && document.getElementById("countdown")) contagem(document.getElementById("countdown"), c.expira_em, desenharGrupo);
 
       let minutos = 60;
       conteudo.querySelectorAll("[data-min]").forEach((b) => b.addEventListener("click", () => {
@@ -349,6 +336,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       document.getElementById("btn-trajeto")?.addEventListener("click", async () => {
         await api.iniciarTrajeto({ grupo: g.id, nome: g.nome, segundos: prazo });
+        // O trajeto já compartilha a localização com o grupo, pelo mesmo tempo
+        await api.autorizarLocalizacao({ minutos: Math.max(1, Math.ceil(prazo / 60)), grupo: g.id });
         toast("Trajeto iniciado. Confirme quando chegar 💜");
         window.dispatchEvent(new Event("violet:trajeto"));
         desenharGrupo();

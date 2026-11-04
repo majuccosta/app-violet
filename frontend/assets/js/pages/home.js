@@ -48,6 +48,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     $("v-rede").textContent = protegida ? `${confianca.length} de 5` : "Adicionar";
     $("chip-rede").classList.toggle("is-on", protegida);
 
+    const meusGrupos = grupos.filter((g) => g.membro).length;
+    $("v-circulo").textContent = meusGrupos === 0 ? "Encontrar" : meusGrupos === 1 ? "1 grupo" : `${meusGrupos} grupos`;
+    $("chip-circulo").classList.toggle("is-on", meusGrupos > 0);
+
     $("v-anon").textContent = estado.anon ? "Ligado" : "Desligado";
     $("chip-anon").classList.toggle("is-on", estado.anon);
     $("chip-anon").setAttribute("aria-pressed", estado.anon);

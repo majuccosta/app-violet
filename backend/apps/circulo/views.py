@@ -1,6 +1,7 @@
 """Círculo de Apoio (RQ011) — grupos de trajeto, pedidos de acompanhamento e localização autorizada."""
 from datetime import timedelta
 
+from django.conf import settings
 from django.utils import timezone
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -16,7 +17,23 @@ class GrupoTrajetoViewSet(viewsets.ModelViewSet):
     """/api/circulo/grupos/ — ?busca=destino para pesquisar grupos"""
     serializer_class = GrupoTrajetoSerializer
 
+    # Grupos de demonstração (ids 1 a 5 do seed) e quanto tempo à frente cada um "sai"
+    DEMO_ATRASOS = {1: timedelta(hours=3), 2: timedelta(hours=5), 3: timedelta(days=2),
+                    4: timedelta(days=1), 5: timedelta(hours=8)}
+
+    def _renovar_demo(self):
+        """No modo demonstração, grupos de teste que já venceram voltam a "sair em breve",
+        assim a lista do Círculo nunca fica vazia na apresentação."""
+        if not getattr(settings, "VERIFICACAO_DEMO", False):
+            return
+        agora = timezone.now()
+        vencidos = GrupoTrajeto.objects.filter(id__in=self.DEMO_ATRASOS, horario__lt=agora - timedelta(hours=3))
+        for grupo in vencidos:
+            grupo.horario = agora + self.DEMO_ATRASOS[grupo.id]
+            grupo.save(update_fields=["horario"])
+
     def get_queryset(self):
+        self._renovar_demo()
         # Mostra grupos que ainda não saíram (com 3 h de tolerância)
         qs = (GrupoTrajeto.objects.filter(ativo=True, horario__gte=timezone.now() - timedelta(hours=3))
               .prefetch_related("participantes__usuaria"))

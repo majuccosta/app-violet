@@ -1,4 +1,0 @@
-# Bibliotecas usadas pelo modelo de IA (preencher com as do protótipo)
-# exemplo:
-# opencv-python
-# torch

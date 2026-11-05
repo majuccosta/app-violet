@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (listaEl) {
     const mapa = document.getElementById("mapa");
     const cardShare = document.getElementById("card-compartilhando");
-    let minutos = 30;
+    const MAIS_DE_UM_DIA = 864e5;
 
     async function pintarLocalizacao() {
       const c = await api.obterCompartilhamento();
@@ -51,30 +51,25 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (ativo) {
         const { total } = await api.usuariasProximas();
         document.getElementById("proximas").textContent = `${total} usuárias verificadas por perto`;
-        contagem(document.getElementById("countdown"), c.expira_em, pintarLocalizacao);
+        const ate = new Date(c.expira_em) - Date.now() > MAIS_DE_UM_DIA;
+        document.getElementById("share-sub").textContent = ate
+          ? "Visível para usuárias verificadas do Círculo até você desligar."
+          : "Localização do seu trajeto. Termina quando você chegar.";
       }
     }
     await pintarLocalizacao();
 
     document.getElementById("btn-autorizar").addEventListener("click", () => openSheet("sheet-autorizar"));
-    document.querySelectorAll("[data-min]").forEach((b) => b.addEventListener("click", () => {
-      minutos = Number(b.dataset.min);
-      document.querySelectorAll("[data-min]").forEach((x) => x.classList.toggle("is-active", x === b));
-    }));
     document.getElementById("confirmar-autorizar").addEventListener("click", async () => {
-      await api.autorizarLocalizacao({ minutos });
+      await api.autorizarLocalizacao({ ate_desligar: true, minutos: 180 });
       closeSheet("sheet-autorizar");
-      toast(`Localização compartilhada por ${minutos >= 60 ? minutos / 60 + " h" : minutos + " min"}.`);
-      pintarLocalizacao();
-    });
-    document.getElementById("btn-mais")?.addEventListener("click", async () => {
-      try { await Violet.estenderLocalizacao(30); toast("Mais 30 minutos de localização."); } catch (e) { toast(e.message); }
+      toast("Localização ligada. Você pode desligar quando quiser.");
       pintarLocalizacao();
     });
     document.getElementById("btn-encerrar").addEventListener("click", async () => {
       await api.encerrarLocalizacao();
       clearInterval(timer);
-      toast("Compartilhamento encerrado.");
+      toast("Localização desligada.");
       pintarLocalizacao();
     });
 
@@ -91,7 +86,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (mapaHub && window.Violet.mapaCampus) {
       const pintarHub = (l) => {
         Violet.mapaCampus(mapaHub, { selecionado: l && l.id, onSelect: pintarHub });
-        document.getElementById("mapa-hub-detalhe").innerHTML = l ? `
+        const detalhe = document.getElementById("mapa-hub-detalhe");
+        detalhe.hidden = !l;
+        detalhe.innerHTML = l ? `
           <div class="row-between"><h4>${esc(l.nome)}</h4><span class="badge">${esc(l.hora)}</span></div>
           <p class="text-sm">${esc(l.desc)}</p>
           <a class="btn btn--primary btn--sm" href="circulo-criar.html?ponto=${encodeURIComponent(l.nome)}">${icon("users", "sm")} Combinar trajeto daqui</a>` : "";
@@ -105,8 +102,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         .filter((g) => (aba === "meus" ? g.membro : !g.membro));
       if (!grupos.length) {
         listaEl.innerHTML = `<div class="empty"><span class="icon-badge icon-badge--round">${icon(aba === "meus" ? "users" : "search")}</span>
-          <p>${aba === "meus" ? "Você ainda não está em nenhum grupo." : "Nenhum grupo para esse destino ainda."}</p>
-          <a href="circulo-criar.html" class="link">Criar um grupo</a></div>`;
+          <p>${aba === "meus" ? "Você ainda não está em nenhum grupo de trajeto." : "Nenhum grupo para esse destino ainda."}</p></div>${botaoCriar()}`;
         return;
       }
       listaEl.innerHTML = grupos.map((g) => `
@@ -125,7 +121,15 @@ document.addEventListener("DOMContentLoaded", async () => {
               <span class="text-xs text-muted">${g.participantes.length}/${g.vagas} vagas</span></div>
             <span class="text-xs text-muted">${icon("map-pin", "sm")}</span>
           </div>
-        </a>`).join("");
+        </a>`).join("") + botaoCriar();
+    }
+
+    // Só aparece em "Meus grupos". Deixa claro que é grupo de TRAJETO (os grupos de conversa ficam em Conversas)
+    function botaoCriar() {
+      if (aba !== "meus") return "";
+      return `<div class="stack-sm" style="margin-top:var(--sp-3)">
+        <a href="circulo-criar.html" class="btn btn--primary">${icon("plus", "sm")} Criar grupo de trajeto</a>
+        <p class="text-xs text-muted text-center">Para combinar um caminho com outras meninas. Grupos para conversar ficam em Conversas.</p></div>`;
     }
 
     function desenharSolicitacoes() {
@@ -269,7 +273,6 @@ document.addEventListener("DOMContentLoaded", async () => {
               <div class="row">
                 <span class="avatar avatar--sm ${p.eu ? "avatar--you" : ""}" data-tone="${p.tone}" ${p.eu ? 'style="background:var(--grad-primary);color:#fff"' : ""}>${p.eu ? "EU" : initials(p.nome)}</span>
                 <span class="grow fw-600 text-sm">${esc(p.nome)}${g.minha && p.eu ? ' <span class="text-xs text-muted">· criadora</span>' : ""}</span>
-                <span class="badge badge--success">${icon("shield-check", "sm")} Verificada</span>
                 ${g.minha && !p.eu ? `<button type="button" class="icon-btn" data-remover="${esc(p.id ?? p.nome)}" data-nome="${esc(p.nome)}" aria-label="Remover ${esc(p.nome)} do grupo" style="color:var(--danger)">${icon("trash", "sm")}</button>` : ""}
               </div>`).join("")}
           </div>
@@ -287,7 +290,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               : `<div class="card stack-sm" id="card-trajeto">
                    <div class="row"><span class="icon-badge">${icon("route")}</span>
                      <div class="grow"><div class="list-item__title">Trajeto seguro</div><div class="list-item__sub">Compartilha sua localização com o grupo durante o trajeto. Se você não confirmar que chegou, sua rede é avisada.</div></div></div>
-                   ${compartilhando ? `<div class="row share-card" style="padding:var(--sp-3);border-radius:var(--r-md)"><div class="grow"><div class="list-item__title">Localização ativa</div><div class="list-item__sub">Encerra em</div></div><span class="countdown" id="countdown">--:--</span><button class="btn btn--soft btn--sm" id="btn-mais">+30 min</button><button class="btn btn--soft btn--sm" id="btn-parar">Encerrar</button></div>` : ""}
+                   ${compartilhando ? `<div class="row share-card" style="padding:var(--sp-3);border-radius:var(--r-md)"><div class="grow"><div class="list-item__title">Localização ativa</div><div class="list-item__sub">Encerra em</div></div><span class="countdown" id="countdown">--:--</span><button class="btn btn--soft btn--sm" id="btn-parar">Encerrar</button></div>` : ""}
                    <div class="duration">${[[900, "15 min"], [1800, "30 min"], [3600, "1 h"], [20, "20 s (demo)"]].map(([sg, t]) => `<button class="chip ${sg === 1800 ? "is-active" : ""}" data-prazo="${sg}">${t}</button>`).join("")}</div>
                    <button class="btn btn--primary" id="btn-trajeto">Iniciar trajeto</button>
                  </div>`}
@@ -318,10 +321,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         toast("Localização compartilhada com o grupo.");
         desenharGrupo();
       });
-      document.getElementById("btn-mais")?.addEventListener("click", async () => {
-        try { await Violet.estenderLocalizacao(30); toast("Mais 30 minutos de localização."); } catch (e) { toast(e.message); }
-        desenharGrupo();
-      });
       document.getElementById("btn-parar")?.addEventListener("click", async () => {
         await api.encerrarLocalizacao();
         clearInterval(timer);
@@ -345,10 +344,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("btn-trajeto")?.addEventListener("click", async () => {
         await api.iniciarTrajeto({ grupo: g.id, nome: g.nome, segundos: prazo });
         // O trajeto já compartilha a localização com o grupo, pelo mesmo tempo
+        // Se a localização já está ligada (até a usuária desligar), o trajeto não mexe nela.
+        // Se estava desligada, liga só pelo tempo do trajeto e desliga ao chegar.
         const ja = await api.obterCompartilhamento();
-        const quer = Math.max(1, Math.ceil(prazo / 60));
-        const resta = ja ? Math.ceil((new Date(ja.expira_em) - Date.now()) / 60000) : 0;
-        if (!ja || resta < quer || String(ja.grupo) !== String(g.id)) await api.autorizarLocalizacao({ minutos: quer, grupo: g.id });
+        if (!ja) await api.autorizarLocalizacao({ minutos: Math.max(1, Math.ceil(prazo / 60)), grupo: g.id });
         toast("Trajeto iniciado. Confirme quando chegar 💜");
         window.dispatchEvent(new Event("violet:trajeto"));
         desenharGrupo();

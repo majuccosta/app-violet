@@ -114,8 +114,10 @@ class SolicitacaoAcompanhamentoViewSet(mixins.ListModelMixin, mixins.CreateModel
 
 
 class LocalizacaoView(APIView):
-    """/api/circulo/localizacao/ — GET compartilhamento ativo, POST autoriza por N minutos, DELETE encerra antes."""
+    """/api/circulo/localizacao/ — GET compartilhamento ativo, POST autoriza (por N minutos, ou
+    "ate_desligar": fica ligada até a usuária desligar), DELETE encerra."""
     LIMITE_MINUTOS = 180
+    ATE_DESLIGAR = timedelta(days=30)   # teto de segurança para o "até desligar"
 
     def _ativo(self, usuaria):
         return CompartilhamentoLocalizacao.objects.filter(
@@ -126,11 +128,18 @@ class LocalizacaoView(APIView):
         return Response(CompartilhamentoLocalizacaoSerializer(c).data if c else None)
 
     def post(self, request):
-        minutos = min(int(request.data.get("minutos", 30)), self.LIMITE_MINUTOS)
+        if str(request.data.get("ate_desligar", "")).lower() in ("true", "1"):
+            duracao = self.ATE_DESLIGAR
+        else:
+            try:
+                minutos = int(request.data.get("minutos", 30))
+            except (TypeError, ValueError):
+                minutos = 30
+            duracao = timedelta(minutes=max(1, min(minutos, self.LIMITE_MINUTOS)))
         CompartilhamentoLocalizacao.objects.filter(usuaria=request.user, encerrado=False).update(encerrado=True)
         c = CompartilhamentoLocalizacao.objects.create(
             usuaria=request.user, grupo_id=request.data.get("grupo"),
-            expira_em=timezone.now() + timedelta(minutes=minutos))
+            expira_em=timezone.now() + duracao)
         return Response(CompartilhamentoLocalizacaoSerializer(c).data, status=status.HTTP_201_CREATED)
 
     def delete(self, request):

@@ -31,7 +31,7 @@
       <section class="stack-sm" aria-labelledby="lugares-titulo">
         <div class="row-between"><h3 id="lugares-titulo">Lugares do campus</h3><a class="link text-sm" href="pontos-seguros.html">Ver tudo</a></div>
         <div class="mapa" id="mapa-hub"></div>
-        <div class="card mapa-detalhe" id="mapa-hub-detalhe" aria-live="polite"><p class="text-sm text-muted">Toque em um lugar para combinar o trajeto a partir dele.</p></div>
+        <div class="card mapa-detalhe" id="mapa-hub-detalhe" aria-live="polite" hidden></div>
       </section>
 
       <!-- Mapa de usuárias próximas (só aparece com localização autorizada) -->
@@ -61,14 +61,10 @@
           <span class="icon-badge"><i data-icon="navigation"></i></span>
           <div class="grow">
             <div class="list-item__title">Localização ativa</div>
-            <div class="list-item__sub">Encerra sozinha em</div>
+            <div class="list-item__sub" id="share-sub">Visível para usuárias verificadas do Círculo até você desligar.</div>
           </div>
-          <span class="countdown" id="countdown">--:--</span>
         </div>
-        <div class="row" style="margin-top:var(--sp-3);gap:var(--sp-2)">
-          <button class="btn btn--soft grow" id="btn-mais">Manter por +30 min</button>
-          <button class="btn btn--soft grow" id="btn-encerrar">Encerrar agora</button>
-        </div>
+        <button class="btn btn--soft" id="btn-encerrar" style="margin-top:var(--sp-3)">Desligar localização</button>
       </section>
 
       <label class="input-wrap">
@@ -84,22 +80,15 @@
 
       <div class="list" id="lista-circulo"></div>
 
-      <a href="circulo-criar.html" class="btn btn--primary"><i data-icon="plus" data-size="sm"></i> Criar grupo de trajeto</a>
     </main>
 
-    <!-- Autorizar localização por tempo limitado -->
+    <!-- Autorizar localização (fica ativa até a usuária desligar; o tempo só vale durante um trajeto) -->
     <div class="sheet-backdrop" id="sheet-autorizar" role="dialog" aria-modal="true" aria-labelledby="aut-titulo">
       <div class="sheet stack">
         <div class="sheet__handle"></div>
         <div class="icon-badge icon-badge--round" style="width:56px;height:56px"><i data-icon="map-pin"></i></div>
         <h3 id="aut-titulo">Compartilhar sua localização</h3>
-        <p class="text-sm text-muted">Usuárias verificadas do Círculo verão um ponto aproximado de onde você está, só durante o tempo escolhido. Você pode encerrar antes quando quiser.</p>
-        <div class="duration" role="radiogroup" aria-label="Duração">
-          <button class="chip" data-min="15">15 min</button>
-          <button class="chip is-active" data-min="30">30 min</button>
-          <button class="chip" data-min="60">1 h</button>
-          <button class="chip" data-min="120">2 h</button>
-        </div>
+        <p class="text-sm text-muted">Usuárias verificadas do Círculo verão um ponto aproximado de onde você está, enquanto a localização estiver ligada. Ela fica ativa até você desligar, quando quiser.</p>
         <button class="btn btn--primary" id="confirmar-autorizar">Autorizar</button>
         <button class="btn btn--soft" onclick="Violet.closeSheet('sheet-autorizar')">Agora não</button>
       </div>

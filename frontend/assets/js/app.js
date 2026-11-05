@@ -186,14 +186,6 @@
   };
   V.closeSheet = (id) => document.getElementById(id)?.classList.remove("is-open");
 
-  /* Mantém a localização ativa por mais tempo (soma ao que ainda resta; máx. 3 h) */
-  V.estenderLocalizacao = async function (extraMin = 30) {
-    const c = await V.api.obterCompartilhamento();
-    if (!c) return null;
-    const resta = Math.max(0, Math.ceil((new Date(c.expira_em) - Date.now()) / 60000));
-    return V.api.autorizarLocalizacao({ minutos: Math.min(180, resta + extraMin), grupo: c.grupo ?? null });
-  };
-
   /* ---------- Utilidades ---------- */
   V.qs = (name) => new URLSearchParams(location.search).get(name);
   V.esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));

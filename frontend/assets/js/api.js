@@ -105,17 +105,30 @@ if (!API_CONFIG.USE_MOCK) {
   }
 }
 
+/* Só para consultas (GET): se o servidor ainda está acordando ou a conexão cai, tenta de novo (até 2 vezes) */
+const TRANSITORIO = /Sem conexão|502|503|504/;
+async function comRetentativa(fazer, metodo) {
+  if (metodo !== "GET") return fazer();
+  for (let tentativa = 0; ; tentativa++) {
+    try { return await fazer(); }
+    catch (e) {
+      if (tentativa >= 2 || !TRANSITORIO.test(String(e && e.message))) throw e;
+      await new Promise((r) => setTimeout(r, 1500 * (tentativa + 1)));
+    }
+  }
+}
+
 async function http(path, opts = {}, jaRenovou = false) {
   const metodo = opts.method || "GET";
   if (metodo !== "GET") {
     cacheLimpar();
     return httpBruto(path, opts, jaRenovou);
   }
-  if (!cacheiavel(path)) return httpBruto(path, opts, jaRenovou);
+  if (!cacheiavel(path)) return comRetentativa(() => httpBruto(path, opts, jaRenovou), "GET");
   const chave = cacheChave(path);
   const buscar = () => {
     if (emVoo.has(chave)) return emVoo.get(chave);
-    const pedido = httpBruto(path, opts, jaRenovou)
+    const pedido = comRetentativa(() => httpBruto(path, opts, jaRenovou), "GET")
       .then((data) => { cacheGravar(path, data); return data; })
       .finally(() => emVoo.delete(chave));
     emVoo.set(chave, pedido);
@@ -155,6 +168,7 @@ async function httpBruto(path, { method = "GET", body, form } = {}, jaRenovou = 
     if (await renovarToken()) return httpBruto(path, { method, body, form }, true);
     sessaoExpirada();
   }
+  if (res.status === 502 || res.status === 503 || res.status === 504) throw new Error(`Sem conexão com o servidor (${res.status}). Ele pode estar acordando; tente de novo em instantes.`);
   if (!res.ok) {
     let msg = "Não foi possível concluir. Tente novamente.";
     try {
@@ -451,9 +465,10 @@ const mock = {
     if (c && new Date(c.expira_em) > new Date()) return c;
     return null;
   },
-  async autorizarLocalizacao({ minutos, grupo = null }) {
+  async autorizarLocalizacao({ minutos, grupo = null, ate_desligar = false }) {
     await wait(300);
-    const c = { grupo, inicio: new Date().toISOString(), expira_em: new Date(Date.now() + minutos * 60e3).toISOString(), minutos };
+    const dur = ate_desligar ? 30 * 864e5 : minutos * 60e3;   // "até desligar" = 30 dias, só por segurança
+    const c = { grupo, inicio: new Date().toISOString(), expira_em: new Date(Date.now() + dur).toISOString(), minutos };
     store.set("compartilhamento", c); return c;
   },
   async encerrarLocalizacao() { store.set("compartilhamento", null); return null; }

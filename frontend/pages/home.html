@@ -30,11 +30,16 @@
       </div>
       <div class="home-hero__greet">
         <p class="home-hero__date" id="data-hoje"></p>
-        <h1><span id="saudacao">Olá</span>,<br><span id="nome-usuaria" class="greeting__nome">Maria Júlia</span>!</h1>
+        <h1><span id="saudacao">Olá</span>,<br><span id="nome-usuaria" class="greeting__nome">&nbsp;</span>!</h1>
       </div>
     </header>
 
-    <main class="screen home-main">
+    <div class="loadbar" id="loadbar" role="progressbar" aria-label="Carregando seus dados"></div>
+    <main class="screen home-main is-loading" id="home-main">
+      <div class="callout callout--warning" id="aviso-falha" hidden>
+        <i data-icon="info"></i><span>Não consegui carregar tudo. O servidor pode estar acordando.</span>
+        <button type="button" class="btn btn--soft btn--sm" onclick="location.reload()">Tentar de novo</button>
+      </div>
       <section class="card guard" id="guard" aria-labelledby="guard-titulo">
         <div class="guard__head">
           <span class="guard__ico" id="guard-ico"><i data-icon="shield-check" data-size="sm"></i></span>

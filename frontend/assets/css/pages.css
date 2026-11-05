@@ -603,3 +603,11 @@ a.orient-card:active { transform: scale(.99); }
 .orient-aviso { display: flex; gap: var(--sp-3); align-items: flex-start; padding: var(--sp-4); border-radius: var(--r-lg, 18px);
   background: var(--violet-100); color: var(--ink-700); font-size: var(--fs-sm, .875rem); line-height: 1.45; }
 .orient-aviso svg, .orient-aviso .icon { flex: none; color: var(--violet-700); }
+
+/* Home: enquanto os dados não chegam, mostra que está carregando (e não parece "outra conta vazia") */
+.loadbar { position: sticky; top: 0; z-index: 30; height: 3px; overflow: hidden; background: transparent; }
+.loadbar::before { content: ""; display: block; height: 100%; width: 40%; border-radius: 3px; background: linear-gradient(90deg, var(--violet-400), var(--pink-400, #ee8fb5)); animation: loadbar 1.1s ease-in-out infinite; }
+.loadbar.is-done { display: none; }
+@keyframes loadbar { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
+.home-main.is-loading .guard__value, .home-main.is-loading .trip, .home-main.is-loading .home-people, .home-main.is-loading #lista-notificacoes { opacity: .45; }
+@media (prefers-reduced-motion: reduce) { .loadbar::before { animation: none; width: 100%; opacity: .5; } }

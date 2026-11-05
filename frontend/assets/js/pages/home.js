@@ -5,7 +5,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (window.Violet.disp.get("tutorial_pendente", false) && !window.Violet.disp.get("tutorial_visto", false)) { location.replace("boas-vindas.html"); return; }
   const $ = (id) => document.getElementById(id);
   const lang = () => document.documentElement.lang || "pt-BR";
-  const seguro = (p, padrao) => Promise.resolve(p).catch(() => padrao);
+  let falhou = false;   // se algum pedido falhar, avisa em vez de deixar a tela vazia sem explicação
+  const seguro = (p, padrao) => Promise.resolve(p).catch(() => { falhou = true; return padrao; });
 
   /* ---------- Saudação e data (mudam com o horário) ---------- */
   const SAUDACOES = {
@@ -25,14 +26,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   pintarHora();
   setInterval(pintarHora, 60000);
 
+  // O nome aparece assim que chegar, sem esperar o resto
+  const pEu = api.me();
+  pEu.then((u) => { $("nome-usuaria").textContent = u.primeiro_nome || u.nome.split(" ")[0]; }).catch(() => {});
   const [eu, conversas, notificacoes, contatos, prefs, grupos, denuncias, proximas] = await Promise.all([
-    api.me(), seguro(api.listarConversas(), []), seguro(api.listarNotificacoes(), []),
+    pEu, seguro(api.listarConversas(), []), seguro(api.listarNotificacoes(), []),
     seguro(api.listarContatos(), []), seguro(api.obterPreferencias(), {}),
     seguro(api.listarGrupos(), []), seguro(api.listarDenuncias(), []),
     seguro(api.usuariasProximas(), { total: 0 })
   ]);
 
   $("nome-usuaria").textContent = eu.primeiro_nome || eu.nome.split(" ")[0];
+  $("loadbar").classList.add("is-done");
+  $("home-main").classList.remove("is-loading");
+  if (falhou) $("aviso-falha").hidden = false;
 
   /* ---------- Você está protegida ---------- */
   const confianca = contatos.filter((c) => c.de_confianca !== false);

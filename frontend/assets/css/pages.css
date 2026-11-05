@@ -43,27 +43,15 @@
   100% { transform: translateY(-78vh) translateX(14px) scale(1.2); opacity: 0; }
 }
 
-/* Ícones flutuando e brilhos piscando (como na versão desenhada) */
+/* Brilhos piscando (como na versão desenhada) */
 .welcome__icones { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
-.welcome__icones .bolha {
-  position: absolute; display: grid; place-items: center; border-radius: 50%;
-  background: rgba(255,255,255,.5); border: 1px solid rgba(255,255,255,.85); box-shadow: 0 6px 18px rgba(91,35,136,.18);
-  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-  animation: float 4s ease-in-out infinite, surge .9s .4s var(--ease) both;
-}
-.welcome__icones .bolha svg { width: 55%; height: 55%; fill: none; stroke: #5b2388; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; overflow: visible; }
-.bolha--1 { left: 9%;  top: 35.5%; width: 46px; height: 46px; }
-.bolha--2 { left: calc(50% - 28px); top: 31.5%; width: 56px; height: 56px; animation-delay: -1.3s, .4s; }
-.bolha--3 { left: 82%; top: 36%;   width: 46px; height: 46px; animation-delay: -2.6s, .4s; }
-@keyframes surge { from { opacity: 0; } to { opacity: 1; } }
-@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 .welcome__icones .brilho { position: absolute; fill: #fff; width: 14px; height: 14px; animation: twinkle 2.6s ease-in-out infinite; }
 .brilho--a { left: 25%; top: 33%; width: 18px !important; height: 18px !important; }
 .brilho--b { left: 72%; top: 29%; animation-delay: -.9s !important; }
 .brilho--c { left: 38%; top: 38%; width: 10px !important; height: 10px !important; animation-delay: -1.7s !important; }
 .brilho--d { left: 92%; top: 43%; width: 10px !important; height: 10px !important; animation-delay: -.5s !important; }
 @keyframes twinkle { 0%, 100% { opacity: .95; transform: scale(1); } 50% { opacity: .25; transform: scale(.55); } }
-@media (prefers-reduced-motion: reduce) { .spark { display: none; } .welcome__icones .bolha, .welcome__icones .brilho { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .spark { display: none; } .welcome__icones .brilho { animation: none; } }
 
 .welcome__brand { display: flex; flex-direction: column; align-items: center; padding: 6vh var(--sp-6) 0; text-align: center; }
 .welcome__flores { width: 108px; height: auto; animation: flowerIn .9s var(--spring) both; }

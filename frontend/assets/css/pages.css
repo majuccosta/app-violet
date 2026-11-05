@@ -11,20 +11,59 @@
 }
 @media (min-width: 640px) { .welcome { min-height: 0; } }
 
-.welcome__wave {   /* onda clara no canto superior esquerdo */
-  position: absolute; z-index: -1; top: -120px; left: -160px; width: 520px; height: 330px;
-  border-radius: 0 0 60% 40% / 0 0 70% 50%; background: var(--w-wave); transform: rotate(-8deg);
+/* A tela inicial é sempre clara, mesmo com o app no modo escuro */
+.welcome { --w-ink: #241030; --w-ink2: #2a0b3d; }
+
+/* Fundo ilustrado (as mulheres se mexem pelo WebGL; a <img> é o plano B) */
+.welcome__bg { position: absolute; inset: 0; z-index: -1; overflow: hidden; background: #dcc6f2; }
+.welcome__foto, .welcome__canvas {
+  position: absolute; inset: 0; width: 100%; height: 100%; filter: brightness(1.1) saturate(1.04);
 }
-.welcome__blob {   /* bolha roxa à direita */
-  position: absolute; z-index: -1; right: -70px; top: 33%; width: 200px; height: 190px;
-  border-radius: 58% 42% 38% 62% / 52% 48% 52% 48%; background: var(--w-blob); opacity: .85;
-  animation: blobMorph 12s ease-in-out infinite alternate;
+.welcome__foto { object-fit: cover; object-position: 50% 100%; }
+.welcome__canvas { opacity: 0; transition: opacity .8s var(--ease); }
+.welcome__bg.is-live .welcome__canvas { opacity: 1; }
+.welcome__fade {   /* leve sombra na base para o botão e o texto ficarem legíveis */
+  position: absolute; left: 0; right: 0; bottom: 0; height: 30%; pointer-events: none;
+  background: linear-gradient(to top, rgba(70, 24, 112, .42), rgba(70, 24, 112, 0));
 }
-@keyframes blobMorph { to { border-radius: 42% 58% 60% 40% / 45% 60% 40% 55%; transform: translateY(14px); } }
-.welcome__dots {
-  position: absolute; z-index: -1; top: 36px; right: 84px; width: 50px; height: 50px;
-  background-image: radial-gradient(var(--w-dots) 1.5px, transparent 1.7px); background-size: 10px 10px;
+.spark {
+  position: absolute; bottom: -12px; width: 8px; height: 8px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, #fff 0%, rgba(255,255,255,0) 70%); opacity: 0;
+  animation: sobe 9s linear infinite;
 }
+.spark--1 { left: 12%; animation-delay: 0s; }
+.spark--2 { left: 30%; width: 6px; height: 6px; animation-delay: -3s; animation-duration: 11s; }
+.spark--3 { left: 52%; width: 10px; height: 10px; animation-delay: -6s; }
+.spark--4 { left: 70%; width: 6px; height: 6px; animation-delay: -1.5s; animation-duration: 12s; }
+.spark--5 { left: 86%; animation-delay: -4.5s; animation-duration: 10s; }
+.spark--6 { left: 42%; width: 5px; height: 5px; animation-delay: -7.5s; animation-duration: 13s; }
+@keyframes sobe {
+  0% { transform: translateY(0) scale(.6); opacity: 0; }
+  15% { opacity: .9; }
+  100% { transform: translateY(-78vh) translateX(14px) scale(1.2); opacity: 0; }
+}
+
+/* Ícones flutuando e brilhos piscando (como na versão desenhada) */
+.welcome__icones { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.welcome__icones .bolha {
+  position: absolute; display: grid; place-items: center; border-radius: 50%;
+  background: rgba(255,255,255,.5); border: 1px solid rgba(255,255,255,.85); box-shadow: 0 6px 18px rgba(91,35,136,.18);
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  animation: float 4s ease-in-out infinite, surge .9s .4s var(--ease) both;
+}
+.welcome__icones .bolha svg { width: 55%; height: 55%; fill: none; stroke: #5b2388; stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; overflow: visible; }
+.bolha--1 { left: 9%;  top: 35.5%; width: 46px; height: 46px; }
+.bolha--2 { left: calc(50% - 28px); top: 31.5%; width: 56px; height: 56px; animation-delay: -1.3s, .4s; }
+.bolha--3 { left: 82%; top: 36%;   width: 46px; height: 46px; animation-delay: -2.6s, .4s; }
+@keyframes surge { from { opacity: 0; } to { opacity: 1; } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.welcome__icones .brilho { position: absolute; fill: #fff; width: 14px; height: 14px; animation: twinkle 2.6s ease-in-out infinite; }
+.brilho--a { left: 25%; top: 33%; width: 18px !important; height: 18px !important; }
+.brilho--b { left: 72%; top: 29%; animation-delay: -.9s !important; }
+.brilho--c { left: 38%; top: 38%; width: 10px !important; height: 10px !important; animation-delay: -1.7s !important; }
+.brilho--d { left: 92%; top: 43%; width: 10px !important; height: 10px !important; animation-delay: -.5s !important; }
+@keyframes twinkle { 0%, 100% { opacity: .95; transform: scale(1); } 50% { opacity: .25; transform: scale(.55); } }
+@media (prefers-reduced-motion: reduce) { .spark { display: none; } .welcome__icones .bolha, .welcome__icones .brilho { animation: none; } }
 
 .welcome__brand { display: flex; flex-direction: column; align-items: center; padding: 6vh var(--sp-6) 0; text-align: center; }
 .welcome__flores { width: 108px; height: auto; animation: flowerIn .9s var(--spring) both; }
@@ -35,17 +74,6 @@
   color: var(--w-ink); animation: fadeIn .8s .15s var(--ease) both;
 }
 .welcome__tag { margin-top: var(--sp-4); font-family: var(--font-display); font-weight: 500; font-size: var(--fs-md); line-height: 1.45; color: var(--w-ink2); animation: fadeIn .8s .3s var(--ease) both; }
-
-.welcome__art { position: absolute; z-index: -1; left: 0; right: 0; bottom: 0; width: 100%; max-width: none; height: auto; margin: 0 auto; }
-.welcome__art .bolha { animation: float 4s ease-in-out infinite; }
-.welcome__art .bolha--2 { animation-delay: -1.3s; }
-.welcome__art .bolha--3 { animation-delay: -2.6s; }
-@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-.welcome__art .brilho { transform-box: fill-box; transform-origin: center; animation: twinkle 2.6s ease-in-out infinite; }
-.welcome__art .brilho--2 { animation-delay: -.9s; }
-.welcome__art .brilho--3 { animation-delay: -1.7s; }
-@keyframes twinkle { 0%, 100% { opacity: .9; transform: scale(1); } 50% { opacity: .3; transform: scale(.6); } }
-.welcome__art .mulher { animation: fadeIn .9s .2s var(--ease) both; }
 
 .welcome__actions { width: 100%; margin-top: auto; padding: var(--sp-6) var(--sp-6) calc(var(--sp-6) + env(safe-area-inset-bottom)); display: grid; gap: var(--sp-3); }
 .welcome__cta {
@@ -300,13 +328,6 @@ a.notif:hover { transform: translateX(3px); box-shadow: var(--shadow-sm); }
 [data-theme="dark"] .theme-toggle .ico-sun { display: block; }
 [data-theme="dark"] .theme-toggle .ico-moon { display: none; }
 
-.welcome__art .a-cabelo { fill: var(--art-cabelo); }
-.welcome__art .a-roupa-c { fill: var(--art-roupa-c); }
-.welcome__art .a-roupa-c2 { fill: var(--art-roupa-c2); }
-.welcome__art .a-roupa-e { fill: var(--art-roupa-e); }
-.welcome__art .a-roupa-d { fill: var(--art-roupa-d); }
-.welcome__art .a-pred { fill: var(--art-pred); }
-.welcome__art .a-janela { fill: var(--art-janela); }
 
 
 /* Tema no cabeçalho do início e das configurações */

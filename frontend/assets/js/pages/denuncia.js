@@ -75,12 +75,37 @@ document.addEventListener("DOMContentLoaded", () => {
       lista.appendChild(el);
 
       // Toda evidência anexada passa pela IA (<<include>> Analisar evidências com IA)
+      const painel = document.createElement("div");
+      painel.hidden = true;
+      painel.style.cssText = "margin:-4px 0 8px;padding:10px 12px;border-radius:12px;background:var(--grad-soft);font-size:var(--fs-sm);line-height:1.45";
+      lista.appendChild(painel);
+      el.querySelector("button").addEventListener("click", () => painel.remove());
+
       api.analisarEvidencia(file).then((r) => {
         item.analise = r;
         const s = el.querySelector("[data-status]");
-        // O resultado detalhado vai para a equipe; para a usuária mostramos só que a análise terminou
-        s.className = "badge badge--success";
-        s.textContent = "analisada pela IA";
+        const pct = Math.round((r.confianca || 0) * 100);
+        let titulo, texto, classe = "badge badge--success", rotulo = "analisada pela IA";
+        if (r.versao_modelo === "tipo-nao-analisado") {
+          titulo = "Este tipo de arquivo ainda não é analisado";
+          texto = "A IA analisa imagens e vídeos. Áudios, PDFs e prints de conversa seguem para a equipe sem análise automática.";
+          classe = "badge"; rotulo = "sem análise automática";
+        } else if (r.versao_modelo === "indisponivel") {
+          titulo = "Análise indisponível no momento";
+          texto = "Sua denúncia pode ser enviada normalmente. A evidência segue para a equipe.";
+          classe = "badge badge--warning"; rotulo = "análise indisponível";
+        } else if (r.indicios) {
+          titulo = `Possível violência física na cena · confiança ${pct}%`;
+          texto = "A IA encontrou sinais de agressão física neste arquivo.";
+          classe = "badge badge--warning"; rotulo = "indícios encontrados";
+        } else {
+          titulo = `Nenhum sinal de violência física encontrado · ${pct}%`;
+          texto = "A IA não avalia assédio, ameaças, conversas ou áudio. Isso não significa que nada aconteceu.";
+        }
+        s.className = classe;
+        s.textContent = rotulo;
+        painel.innerHTML = `<strong>${icon("sparkles", "sm")} Análise de apoio da IA</strong><br>${esc(titulo)}<br><span class="text-muted">${esc(texto)} Não comprova a ocorrência.</span>`;
+        painel.hidden = false;
       }).catch(() => (el.querySelector("[data-status]").textContent = "análise pendente"));
     });
     e.target.value = "";

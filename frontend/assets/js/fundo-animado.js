@@ -5,19 +5,25 @@
 (function () {
   var bg = document.querySelector(".welcome__bg");
   if (!bg) return;
-  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  // Só para se a pessoa ligou "Reduzir animações" dentro do app. A configuração do Windows é ignorada de propósito:
+  // muitos computadores (faculdade, modo economia, acesso remoto) vêm com ela desligada e a tela ficava parada.
+  if (document.documentElement.dataset.reduzir === "1") return;
+  // Plano B: sem WebGL (ou se ficar lento), a imagem anima por CSS
+  function planoB() { bg.classList.add("is-css"); if (canvas.parentNode) canvas.parentNode.removeChild(canvas); }
 
+  var parar = false;
   var canvas = document.createElement("canvas");
   canvas.className = "welcome__canvas";
   var gl = canvas.getContext("webgl", { antialias: false, alpha: false, premultipliedAlpha: false });
-  if (!gl) return;
+  if (!gl) { planoB(); return; }
+  canvas.addEventListener("webglcontextlost", function (e) { e.preventDefault(); parar = true; planoB(); });
 
   var VS = "attribute vec2 a;varying vec2 v;void main(){v=vec2(a.x*.5+.5,.5-a.y*.5);gl_Position=vec4(a,0.,1.);}";
   var FS = [
     "precision mediump float;",
     "varying vec2 v;",
     "uniform sampler2D uImg,uA,uB;",
-    "uniform float uT,uCa;",
+    "uniform float uT,uCa,uAy;",
     "const vec2 SZ=vec2(853.,1844.);",
     "const float IA=853./1844.;",
     // deslocamento (em pixels da imagem) de uma mulher: balanço com alavanca (cabeça mexe mais), respiração e ondulação
@@ -31,7 +37,8 @@
     "}",
     "void main(){",
     "  vec2 uv;",
-    "  if(uCa>IA){uv=vec2(v.x,1.-(1.-v.y)*(IA/uCa));}",
+    // tela mais "larga" que a ilustração: corta um pouco em cima e mais embaixo (uAy=.3), assim o texto não cobre as cabeças
+    "  if(uCa>IA){float f=IA/uCa;uv=vec2(v.x,(1.-f)*uAy+v.y*f);}",
     "  else{uv=vec2(.5+(v.x-.5)*(uCa/IA),v.y);}",
     "  vec2 p=uv*SZ;",
     "  vec3 a=texture2D(uA,uv).rgb; vec3 b=texture2D(uB,uv).rgb;",
@@ -59,8 +66,9 @@
     gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS));
     gl.linkProgram(prog);
     if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error("link");
-  } catch (e) { return; }
+  } catch (e) { planoB(); return; }
   gl.useProgram(prog);
+  gl.uniform1f(gl.getUniformLocation(prog, "uAy"), 0.3);
 
   var buf = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, buf);
@@ -90,7 +98,7 @@
       } catch (e) { falhou = true; }
       if (--pendentes === 0 && !falhou) iniciar();
     };
-    img.onerror = function () { falhou = true; };
+    img.onerror = function () { falhou = true; planoB(); };
     img.src = src;
   });
 
@@ -106,11 +114,18 @@
     bg.appendChild(canvas);
     ajustar();
     if (window.ResizeObserver) new ResizeObserver(ajustar).observe(bg); else window.addEventListener("resize", ajustar);
-    var t0 = performance.now();
+    var t0 = performance.now(), n = 0, medido = false;
     (function quadro(agora) {
+      if (parar) return;
       gl.uniform1f(uT, (agora - t0) / 1000);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       if (!bg.classList.contains("is-live")) bg.classList.add("is-live");
+      // computador sem placa de vídeo: se os primeiros quadros forem lentos (menos de ~12 por segundo), troca pelo plano B
+      n++;
+      if (!medido && (n === 40 || agora - t0 > 4000)) {
+        medido = true;
+        if ((agora - t0) / n > 85) { parar = true; bg.classList.remove("is-live"); planoB(); return; }
+      }
       requestAnimationFrame(quadro);
     })(t0);
   }

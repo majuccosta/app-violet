@@ -11,6 +11,28 @@
 }
 @media (min-width: 640px) { .welcome { min-height: 0; } }
 
+/* Escala: os tamanhos da tela inicial acompanham a largura do aparelho (cqw), então nada fica espremido */
+.welcome { container-type: inline-size; }
+
+/* Em computador: o aparelho mantém a proporção de celular e encolhe junto com a janela
+   (antes ele só ficava mais baixo em notebooks pequenos, e a ilustração e o texto se amassavam) */
+@media (min-width: 640px) {
+  body:has(.welcome) { padding: 16px 0; }
+  .app:has(> .welcome) {
+    width: min(100%, var(--app-w), calc((100dvh - 32px) * .472));
+    aspect-ratio: 420 / 890;
+    min-height: 0; max-height: none;
+    overflow: hidden;
+  }
+}
+
+/* Plano B quando o WebGL não existe ou está lento: a própria imagem respira e balança devagar */
+.welcome__bg.is-css .welcome__foto { transform-origin: 50% 100%; animation: fundoRespira 8s ease-in-out infinite; will-change: transform; }
+@keyframes fundoRespira {
+  0%, 100% { transform: scale(1.02) translate3d(0, 0, 0); }
+  50%      { transform: scale(1.05) translate3d(-5px, -6px, 0); }
+}
+
 /* A tela inicial é sempre clara, mesmo com o app no modo escuro */
 .welcome { --w-ink: #241030; --w-ink2: #2a0b3d; }
 
@@ -19,7 +41,7 @@
 .welcome__foto, .welcome__canvas {
   position: absolute; inset: 0; width: 100%; height: 100%; filter: brightness(1.1) saturate(1.04);
 }
-.welcome__foto { object-fit: cover; object-position: 50% 100%; }
+.welcome__foto { object-fit: cover; object-position: 50% 30%; }
 .welcome__canvas { opacity: 0; transition: opacity .8s var(--ease); }
 .welcome__bg.is-live .welcome__canvas { opacity: 1; }
 .welcome__fade {   /* leve sombra na base para o botão e o texto ficarem legíveis */
@@ -51,21 +73,22 @@
 .brilho--c { left: 38%; top: 38%; width: 10px !important; height: 10px !important; animation-delay: -1.7s !important; }
 .brilho--d { left: 92%; top: 43%; width: 10px !important; height: 10px !important; animation-delay: -.5s !important; }
 @keyframes twinkle { 0%, 100% { opacity: .95; transform: scale(1); } 50% { opacity: .25; transform: scale(.55); } }
-@media (prefers-reduced-motion: reduce) { .spark { display: none; } .welcome__icones .brilho { animation: none; } }
+html[data-reduzir="1"] .spark { display: none; } html[data-reduzir="1"] .welcome__icones .brilho { animation: none; }
 
 .welcome__brand { display: flex; flex-direction: column; align-items: center; padding: 6vh var(--sp-6) 0; text-align: center; }
-.welcome__flores { width: 108px; height: auto; animation: flowerIn .9s var(--spring) both; }
+@media (min-width: 640px) { .welcome__brand { padding-top: 7cqw; } }
+.welcome__flores { width: min(108px, 26cqw); height: auto; animation: flowerIn .9s var(--spring) both; }
 @keyframes flowerIn { from { transform: scale(.6) rotate(-25deg); opacity: 0; } to { transform: none; opacity: 1; } }
 .welcome__nome {
   font-family: "Cormorant Garamond", "Cormorant", Georgia, "Times New Roman", serif;
-  font-weight: 500; font-size: 3.6rem; letter-spacing: .08em; line-height: 1; margin-top: 4px;
+  font-weight: 500; font-size: min(3.6rem, 13.7cqw); letter-spacing: .08em; line-height: 1; margin-top: 4px;
   color: var(--w-ink); animation: fadeIn .8s .15s var(--ease) both;
 }
-.welcome__tag { margin-top: var(--sp-4); font-family: var(--font-display); font-weight: 500; font-size: var(--fs-md); line-height: 1.45; color: var(--w-ink2); animation: fadeIn .8s .3s var(--ease) both; }
+.welcome__tag { margin-top: var(--sp-3); font-family: var(--font-display); font-weight: 500; font-size: clamp(.78rem, 3.6cqw, var(--fs-md)); line-height: 1.45; color: var(--w-ink2); animation: fadeIn .8s .3s var(--ease) both; }
 
-.welcome__actions { width: 100%; margin-top: auto; padding: var(--sp-6) var(--sp-6) calc(var(--sp-6) + env(safe-area-inset-bottom)); display: grid; gap: var(--sp-3); }
+.welcome__actions { width: 100%; margin-top: auto; padding: clamp(12px, 5cqw, var(--sp-6)) clamp(14px, 5.7cqw, var(--sp-6)) calc(clamp(12px, 5cqw, var(--sp-6)) + env(safe-area-inset-bottom)); display: grid; gap: var(--sp-3); }
 .welcome__cta {
-  min-height: 58px; background: #f6eefc; color: #2a0b3d; font-size: var(--fs-lg);
+  min-height: clamp(44px, 13.8cqw, 58px); background: #f6eefc; color: #2a0b3d; font-size: var(--fs-lg);
   box-shadow: 0 12px 28px rgba(26, 6, 40, .35);
 }
 .welcome__cta .icon { transition: transform .3s var(--spring); }
@@ -619,4 +642,4 @@ a.orient-card:active { transform: scale(.99); }
 .loadbar.is-done { display: none; }
 @keyframes loadbar { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
 .home-main.is-loading .guard__value, .home-main.is-loading .trip, .home-main.is-loading .home-people, .home-main.is-loading #lista-notificacoes { opacity: .45; }
-@media (prefers-reduced-motion: reduce) { .loadbar::before { animation: none; width: 100%; opacity: .5; } }
+html[data-reduzir="1"] .loadbar::before { animation: none; width: 100%; opacity: .5; }

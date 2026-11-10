@@ -16,7 +16,7 @@
     { id: "perfil", href: "perfil.html", icon: "user", label: "Perfil" }
   ];
 
-  const reduzMovimento = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const reduzMovimento = document.documentElement.dataset.reduzir === "1"; // escolha dentro do app (Configurações)
   const sessao = {
     get(k) { try { return sessionStorage.getItem("violet:" + k); } catch { return null; } },
     set(k, v) { try { sessionStorage.setItem("violet:" + k, v); } catch { /* sem storage */ } }

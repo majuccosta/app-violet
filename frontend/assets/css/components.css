@@ -612,10 +612,8 @@ a.list-item:hover .list-item__chev, a.list-item:hover > svg:last-child { transfo
 [data-theme="dark"] .theme-toggle--app .ico-sun { display: block; }
 [data-theme="dark"] .theme-toggle--app .ico-moon { display: none; }
 .theme-toggle--app:hover { transform: translateY(-1px) scale(1.04); background: var(--hover); }
-@media (prefers-reduced-motion: reduce) {
-  .bottom-nav .sos-fab::before, .bottom-nav .sos-fab::after,
-  .bottom-nav .sos-fab .icon { animation: none !important; }
-}
+html[data-reduzir="1"] .bottom-nav .sos-fab::before, html[data-reduzir="1"] .bottom-nav .sos-fab::after,
+html[data-reduzir="1"] .bottom-nav .sos-fab .icon { animation: none !important; }
 
 /* Ajustes solicitados: respiro entre tema e notificações; navegação com transição fluida. */
 .home-head { gap: 22px; }
@@ -626,7 +624,7 @@ a.list-item:hover .list-item__chev, a.list-item:hover > svg:last-child { transfo
 .greeting-row .theme-toggle--app { position: relative; top: auto; right: auto; flex-shrink: 0; align-self: flex-start; margin-top: 4px; }
 .bottom-nav a.is-tapped .icon { animation: navTap .32s cubic-bezier(.2,.8,.2,1); }
 @keyframes navTap { 0% { transform: scale(1); } 55% { transform: scale(1.18) translateY(-2px); } 100% { transform: scale(1); } }
-@media (prefers-reduced-motion: reduce) { .bottom-nav__pill, .bottom-nav a, .bottom-nav a::before, .bottom-nav a .icon, .bottom-nav a span { transition: none !important; animation: none !important; } }
+html[data-reduzir="1"] .bottom-nav__pill, html[data-reduzir="1"] .bottom-nav a, html[data-reduzir="1"] .bottom-nav a::before, html[data-reduzir="1"] .bottom-nav a .icon, html[data-reduzir="1"] .bottom-nav a span { transition: none !important; animation: none !important; }
 
 /* Denúncia: respiro entre a barra do topo e as etapas */
 #stepper-wrap { padding: var(--sp-5) var(--sp-5) var(--sp-1); overflow: visible; }

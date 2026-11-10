@@ -113,9 +113,6 @@ body.is-leaving .screen, body.is-leaving .topbar, body.is-leaving .convo-head { 
 
 [hidden] { display: none !important; }
 
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
-}
 
 
 /* Evita saltos de largura ao navegar e suaviza mudanças de tema */
@@ -127,16 +124,10 @@ img, svg { flex-shrink: 0; }
   .screen { padding-left: var(--sp-4); padding-right: var(--sp-4); }
   .home-head { gap: 6px; }
 }
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-}
 
 /* ---------- Acessibilidade: tamanho do texto e redução de animações ---------- */
 html[data-fonte="grande"] { font-size: 112.5%; }
 html[data-fonte="enorme"] { font-size: 125%; }
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
-}
 html[data-reduzir="1"] *, html[data-reduzir="1"] *::before, html[data-reduzir="1"] *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 
 /* Lista aberta dos campos de seleção (select): acompanha o tema, inclusive no escuro */

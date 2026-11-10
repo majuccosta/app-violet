@@ -86,19 +86,12 @@ A API sobe em `http://localhost:8000/api/`.
 
 Abra a pasta `frontend/` com o Live Server do VS Code (porta 5500). Quando aberto em `localhost` ou `127.0.0.1`, o app usa automaticamente a API local; no GitHub Pages, ele usa a API do Render.
 
-> Atenção: o banco local e o banco publicado são **diferentes**. Contas e dados criados em um não existem no outro.
-
 **Testes da IA**
 
 ```bash
 cd backend
 python -m unittest apps.ia.tests -v
 ```
-
-## Segurança
-
-- O arquivo `.env` (senhas, chaves e configuração do banco) **nunca** é enviado ao GitHub. Use o `.env.example` como modelo.
-- As contas de demonstração e as instruções de teste foram entregues à banca no repositório da faculdade.
 
 ## Equipe
 

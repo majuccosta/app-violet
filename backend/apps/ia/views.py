@@ -1,3 +1,4 @@
+import os
 import tempfile
 from pathlib import Path
 
@@ -16,10 +17,17 @@ class AnalisarEvidenciaView(APIView):
         arquivo = request.FILES.get("arquivo")
         if not arquivo:
             return Response({"detail": "Envie um arquivo no campo 'arquivo'."}, status=400)
-        with tempfile.NamedTemporaryFile(suffix=Path(arquivo.name).suffix) as tmp:
-            for parte in arquivo.chunks():
-                tmp.write(parte)
-            tmp.flush()
+        # delete=False + fechar antes de analisar: no Windows um arquivo aberto não pode ser reaberto
+        tmp = tempfile.NamedTemporaryFile(suffix=Path(arquivo.name).suffix, delete=False)
+        try:
+            with tmp:
+                for parte in arquivo.chunks():
+                    tmp.write(parte)
             resultado = analisar_evidencia(tmp.name, arquivo.content_type)
+        finally:
+            try:
+                os.unlink(tmp.name)
+            except OSError:
+                pass
         return Response({"arquivo": arquivo.name, **resultado,
                          "observacao": "Resultado de apoio. Não comprova a ocorrência."})

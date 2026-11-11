@@ -643,3 +643,9 @@ a.orient-card:active { transform: scale(.99); }
 @keyframes loadbar { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
 .home-main.is-loading .guard__value, .home-main.is-loading .trip, .home-main.is-loading .home-people, .home-main.is-loading #lista-notificacoes { opacity: .45; }
 html[data-reduzir="1"] .loadbar::before { animation: none; width: 100%; opacity: .5; }
+/* Celular: a tela inicial vai de ponta a ponta, por baixo das barras do Safari */
+@media (max-width: 639px) {
+  html:has(.welcome),
+  html:has(.welcome) body { background: #dcc6f2; }
+  .welcome__bg { position: fixed; inset: 0; height: 100lvh; }
+}

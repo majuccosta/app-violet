@@ -112,5 +112,18 @@ class AssinaturaTests(unittest.TestCase):
         self.assertEqual(didit.assinatura_esperada({"b": [2, 3], "a": 1.0}, "k"), esperado)
 
 
+class GeneroTests(unittest.TestCase):
+    def test_le_o_genero_do_documento(self):
+        self.assertEqual(didit.genero_do_documento({"id_verifications": [{"gender": "F"}]}), "F")
+        self.assertEqual(didit.genero_do_documento({"id_verifications": [{"gender": "m"}]}), "M")
+        self.assertEqual(didit.genero_do_documento({"id_verifications": [{"gender": "U"}]}), "U")
+
+    def test_sem_informacao_devolve_none(self):
+        for decisao in (None, {}, {"id_verifications": []}, {"id_verifications": [{}]},
+                        {"id_verifications": [{"gender": None}]}, {"id_verifications": [{"gender": "X"}]},
+                        {"id_verifications": None}):
+            self.assertIsNone(didit.genero_do_documento(decisao))
+
+
 if __name__ == "__main__":
     unittest.main()

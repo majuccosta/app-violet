@@ -83,7 +83,7 @@ def _foto(nome="doc.png"):
     Image.new("RGB", (20, 20), "white").save(buf, format="PNG")
     return SimpleUploadedFile(nome, buf.getvalue(), content_type="image/png")
 
-
+@override_settings(DIDIT_API_KEY="", DIDIT_WORKFLOW_ID="")
 class CadastroEVerificacaoTests(TestCase):
     DADOS = {"nome_completo": "Bia Lima", "email": "bia@ceub.edu.br", "senha": SENHA, "data_nascimento": "2003-05-10"}
 

@@ -3,14 +3,31 @@ import json
 import time
 from unittest import mock
 
-from django.test import TestCase, override_settings
+from django.core.cache import cache
+from django.test import TestCase as _TestCase
+from django.test import override_settings
 from rest_framework.test import APIClient
 
 from apps.comum.testes import cliente_logado, criar_usuaria
-from apps.usuarias import didit
+from apps.usuarias import didit, ibge
 from apps.usuarias.models import Usuaria, VerificacaoIdentidade
 
-DIDIT = dict(DIDIT_API_KEY="chave", DIDIT_WORKFLOW_ID="wf-1", DIDIT_WEBHOOK_SECRET="segredo", DIDIT_CALLBACK_URL="")
+
+
+class TestCase(_TestCase):
+    """Limpa o cache (contadores do limite de requisições) entre os testes, para não causar erro 429 em outros testes."""
+
+    def setUp(self):
+        super().setUp()
+        cache.clear()
+
+    def tearDown(self):
+        cache.clear()
+        super().tearDown()
+
+
+DIDIT = dict(DIDIT_API_KEY="chave", DIDIT_WORKFLOW_ID="wf-1", DIDIT_WEBHOOK_SECRET="segredo", DIDIT_CALLBACK_URL="",
+             VERIFICACAO_USAR_NOME_IBGE=False)   # nos testes não consultamos o IBGE de verdade
 SESSAO = {"session_id": "sess-1", "url": "https://verify.didit.me/s/1", "status": "Not Started"}
 
 
@@ -111,7 +128,9 @@ class WebhookTests(TestCase):
     def test_webhook_aprovado_verifica_a_usuaria(self):
         u = nao_verificada()
         VerificacaoIdentidade.objects.create(usuaria=u, id_sessao_didit="sess-1")
-        r = self._enviar({"session_id": "sess-1", "status": "Approved", "webhook_type": "status.updated"})
+        decisao = {"status": "Approved", "id_verifications": [{"gender": "F"}]}
+        with mock.patch("apps.usuarias.didit.consultar_decisao", return_value=decisao):
+            r = self._enviar({"session_id": "sess-1", "status": "Approved", "webhook_type": "status.updated"})
         self.assertEqual(r.status_code, 200)
         u.refresh_from_db()
         self.assertTrue(u.verificada)
@@ -142,3 +161,134 @@ class WebhookSemSegredoTests(TestCase):
         r = APIClient().post("/api/usuarias/verificacao/webhook/", json.dumps(corpo).encode(), content_type="application/json",
                              HTTP_X_SIGNATURE_V2=didit.assinatura_esperada(corpo, ""), HTTP_X_TIMESTAMP=str(int(time.time())))
         self.assertEqual(r.status_code, 401)
+
+
+def _decisao(genero, status="Approved", nome=None):
+    item = {}
+    if genero is not None:
+        item["gender"] = genero
+    if nome:
+        item["full_name"] = nome
+    return {"status": status, "id_verifications": [item]}
+
+
+@override_settings(**DIDIT)
+class SoMulheresTests(TestCase):
+    """O Violet é só para mulheres: a Didit aprova o documento, mas o gênero do documento também conta."""
+
+    def _status(self, decisao):
+        u = nao_verificada()
+        VerificacaoIdentidade.objects.create(usuaria=u, id_sessao_didit="sess-1")
+        with mock.patch("apps.usuarias.didit.consultar_decisao", return_value=decisao):
+            r = cliente_logado(u).get("/api/usuarias/verificacao/status/")
+        u.refresh_from_db()
+        return r, u
+
+    def test_documento_feminino_e_aprovado(self):
+        r, u = self._status(_decisao("F"))
+        self.assertEqual((r.data["status"], u.verificada), ("aprovada", True))
+
+    def test_documento_masculino_e_recusado_mesmo_com_didit_aprovando(self):
+        r, u = self._status(_decisao("M"))
+        self.assertEqual((r.data["status"], u.verificada), ("reprovada", False))
+
+    def test_documento_sem_genero_e_aceito_por_padrao(self):
+        r, u = self._status(_decisao("U"))
+        self.assertEqual((r.data["status"], u.verificada), ("aprovada", True))
+
+    @override_settings(DIDIT_ACEITAR_SEM_GENERO=False)
+    def test_documento_sem_genero_pode_ser_recusado_por_configuracao(self):
+        r, u = self._status(_decisao(None))
+        self.assertEqual((r.data["status"], u.verificada), ("reprovada", False))
+
+    @override_settings(DIDIT_EXIGIR_MULHER=False)
+    def test_regra_pode_ser_desligada(self):
+        r, u = self._status(_decisao("M"))
+        self.assertEqual((r.data["status"], u.verificada), ("aprovada", True))
+
+    def test_webhook_aprovado_de_documento_masculino_nao_verifica(self):
+        u = nao_verificada()
+        VerificacaoIdentidade.objects.create(usuaria=u, id_sessao_didit="sess-1")
+        corpo = {"session_id": "sess-1", "status": "Approved"}
+        with mock.patch("apps.usuarias.didit.consultar_decisao", return_value=_decisao("M")):
+            r = APIClient().post("/api/usuarias/verificacao/webhook/", json.dumps(corpo).encode(),
+                                 content_type="application/json",
+                                 HTTP_X_SIGNATURE_V2=didit.assinatura_esperada(corpo, "segredo"),
+                                 HTTP_X_TIMESTAMP=str(int(time.time())))
+        self.assertEqual(r.status_code, 200)
+        u.refresh_from_db()
+        self.assertFalse(u.verificada)
+
+    def test_webhook_sem_conseguir_conferir_o_genero_nao_aprova(self):
+        u = nao_verificada()
+        VerificacaoIdentidade.objects.create(usuaria=u, id_sessao_didit="sess-1")
+        corpo = {"session_id": "sess-1", "status": "Approved"}
+        with mock.patch("apps.usuarias.didit.consultar_decisao", side_effect=didit.DiditErro("fora do ar")):
+            APIClient().post("/api/usuarias/verificacao/webhook/", json.dumps(corpo).encode(),
+                             content_type="application/json",
+                             HTTP_X_SIGNATURE_V2=didit.assinatura_esperada(corpo, "segredo"),
+                             HTTP_X_TIMESTAMP=str(int(time.time())))
+        u.refresh_from_db()
+        self.assertFalse(u.verificada)
+
+
+def _analise(classe, pct=None):
+    return {"nome": "maria", "classe": classe, "pct_feminino": pct, "total": 1000000}
+
+
+@override_settings(**{**DIDIT, "VERIFICACAO_USAR_NOME_IBGE": True})
+class NomeIbgeTests(TestCase):
+    """Documento sem gênero: o primeiro nome decide (base do IBGE)."""
+
+    def _status(self, analise=None, erro=None, decisao=None):
+        u = nao_verificada()
+        VerificacaoIdentidade.objects.create(usuaria=u, id_sessao_didit="sess-1")
+        decisao = decisao or _decisao("U", nome="Maria Júlia de Carvalho")
+        efeito = {"side_effect": erro} if erro else {"return_value": analise}
+        with mock.patch("apps.usuarias.didit.consultar_decisao", return_value=decisao), \
+             mock.patch("apps.usuarias.ibge.analisar_nome", **efeito) as consulta:
+            r = cliente_logado(u).get("/api/usuarias/verificacao/status/")
+        u.refresh_from_db()
+        return r, u, consulta
+
+    def test_nome_feminino_aprova(self):
+        r, u, consulta = self._status(_analise("F", 99.7))
+        self.assertEqual((r.data["status"], u.verificada), ("aprovada", True))
+        self.assertEqual(consulta.call_args.args[0], "Maria Júlia de Carvalho")
+
+    def test_nome_masculino_recusa(self):
+        r, u, _ = self._status(_analise("M", 0.4))
+        self.assertEqual((r.data["status"], u.verificada), ("reprovada", False))
+
+    def test_nome_ambiguo_fica_pendente(self):
+        r, u, _ = self._status(_analise("A", 55.0))
+        self.assertEqual((r.data["status"], u.verificada), ("pendente", False))
+
+    def test_ibge_fora_do_ar_fica_pendente(self):
+        r, u, _ = self._status(erro=ibge.IbgeErro("fora do ar"))
+        self.assertEqual((r.data["status"], u.verificada), ("pendente", False))
+
+    def test_documento_com_genero_nao_consulta_o_ibge(self):
+        r, u, consulta = self._status(_analise("M"), decisao=_decisao("F", nome="Carlos"))
+        consulta.assert_not_called()
+        self.assertTrue(u.verificada)
+
+    def test_resposta_traz_o_passo_a_passo_da_conferencia(self):
+        r, _, _ = self._status(_analise("F", 99.7))
+        self.assertEqual(r.data["conferencia"], {
+            "genero_documento": "U", "nome": "Maria", "metodo": "ibge", "classe": "F",
+            "pct_feminino": 99.7, "resultado": "aprovada"})
+
+    def test_conferencia_do_documento_com_genero(self):
+        r, _, _ = self._status(decisao=_decisao("F", nome="Ana Paula"))
+        self.assertEqual(r.data["conferencia"]["metodo"], "documento")
+        self.assertEqual(r.data["conferencia"]["genero_documento"], "F")
+
+    def test_conferencia_mostra_o_ibge_indisponivel(self):
+        r, _, _ = self._status(erro=ibge.IbgeErro("fora do ar"))
+        self.assertEqual(r.data["conferencia"]["metodo"], "indisponivel")
+        self.assertEqual(r.data["conferencia"]["resultado"], "pendente")
+
+    def test_conferencia_so_leva_o_primeiro_nome(self):
+        r, _, _ = self._status(_analise("F", 99.7))
+        self.assertNotIn("Carvalho", str(r.data["conferencia"]))

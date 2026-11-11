@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     atual = n;
     steps.forEach((s) => (s.hidden = Number(s.dataset.step) !== n));
     document.getElementById("retorno-didit").hidden = true;
+    document.getElementById("conferencia").hidden = true;
     document.getElementById("progresso").style.width = `${((n - 1) / (total - 1)) * 100}%`;
     document.getElementById("progresso").parentElement.parentElement.hidden = n === 1;   // sem barra solta na introdução
     document.getElementById("btn-voltar").style.visibility = n === total ? "hidden" : "visible";
@@ -104,18 +105,93 @@ document.addEventListener("DOMContentLoaded", () => {
   };
   const mostrarRetorno = (titulo, texto, { voltar = false, refazer: tentar = false } = {}) => {
     steps.forEach((s) => (s.hidden = true));
+    document.getElementById("conferencia").hidden = true;
     retorno.el.hidden = false;
     retorno.titulo.textContent = titulo; retorno.texto.textContent = texto;
     retorno.voltar.hidden = !voltar; retorno.refazer.hidden = !tentar;
   };
   retorno.refazer.addEventListener("click", () => { history.replaceState(null, "", location.pathname); ir(1); });
 
+  // ---- Conferência do nome: passo a passo, aparece depois que a Didit aprova o documento ----
+  const mensagemRecusa = ["Não conseguimos confirmar o seu cadastro",
+    "Confira se o documento está nítido e inteiro, com boa iluminação, e tente de novo. Se acha que houve um engano, fale com o suporte do Violet."];
+  const mensagemRevisao = ["Documento recebido!",
+    "Seu cadastro está em revisão por uma administradora. Você poderá usar o Violet assim que ele for aprovado."];
+
+  const passosDaConferencia = (c) => {
+    const nome = esc(c.nome || "");
+    const pct = c.pct_feminino != null ? String(c.pct_feminino).replace(".", ",") : "";
+    const passos = [{ icone: "check", tom: "ok", titulo: "Identidade confirmada",
+      sub: "Documento, selfie e prova de vida verificados pela Didit." }];
+    if (c.genero_documento === "F" || c.genero_documento === "M") {
+      passos.push({ icone: c.genero_documento === "F" ? "check" : "x", tom: c.genero_documento === "F" ? "ok" : "erro",
+        titulo: "Gênero informado no documento",
+        sub: c.genero_documento === "F" ? "Feminino, como consta no seu documento." : "Masculino, como consta no documento." });
+    } else {
+      passos.push({ icone: "info", tom: "info", titulo: "Gênero no documento",
+        sub: "Seu documento não informa o gênero. Vamos conferir pelo primeiro nome." });
+      if (c.metodo === "ibge") {
+        const ok = c.classe === "F", erro = c.classe === "M";
+        passos.push({ icone: ok ? "check" : erro ? "x" : "clock", tom: ok ? "ok" : erro ? "erro" : "aviso",
+          titulo: `Primeiro nome: ${nome}`,
+          sub: pct ? `${pct}% das pessoas com esse nome no Brasil são mulheres (base do IBGE).`
+                   : "Nome pouco comum na base do IBGE." });
+      } else if (c.metodo === "indisponivel") {
+        passos.push({ icone: "clock", tom: "aviso", titulo: `Primeiro nome: ${nome}`,
+          sub: "Não conseguimos consultar a base do IBGE agora." });
+      }
+    }
+    const fim = { aprovada: ["check", "ok", "Cadastro confirmado", "Tudo certo: você já pode usar o Violet."],
+      pendente: ["clock", "aviso", "Em revisão", "Uma administradora vai analisar o seu cadastro."],
+      reprovada: ["x", "erro", "Não foi possível confirmar", "O cadastro não passou na conferência."] }[c.resultado]
+      || ["info", "info", "Resultado", ""];
+    passos.push({ icone: fim[0], tom: fim[1], titulo: fim[2], sub: fim[3], final: true });
+    return passos;
+  };
+
+  const mostrarConferencia = (c, aoContinuar) => {
+    steps.forEach((x) => (x.hidden = true));
+    retorno.el.hidden = true;
+    const tela = document.getElementById("conferencia");
+    const lista = document.getElementById("conf-lista");
+    const btn = document.getElementById("conf-continuar");
+    tela.hidden = false; btn.disabled = true; lista.innerHTML = "";
+    document.getElementById("conf-nota").hidden = c.metodo === "documento";
+    document.getElementById("progresso").parentElement.parentElement.hidden = true;
+    document.getElementById("btn-voltar").style.visibility = "hidden";
+    const classeIcone = { ok: "icon-badge icon-badge--success", erro: "icon-badge icon-badge--danger", aviso: "icon-badge", info: "icon-badge" };
+    const rapido = document.documentElement.dataset.reduzir === "1";   // "Reduzir animações" ligado: mostra tudo de uma vez
+    const passos = passosDaConferencia(c);
+    passos.forEach((p, i) => {
+      setTimeout(() => {
+        const div = document.createElement("div");
+        div.className = "list-item fade-in";
+        div.innerHTML = `<span class="${classeIcone[p.tom]}"><i data-icon="${p.icone}"></i></span>` +
+          `<div class="grow"><div class="list-item__title">${p.titulo}</div><div class="list-item__sub">${p.sub}</div></div>`;
+        lista.appendChild(div);
+        window.Violet.renderIcons(div);
+        if (i === passos.length - 1) btn.disabled = false;
+      }, rapido ? 0 : i * 900);
+    });
+    btn.onclick = aoContinuar;
+  };
+
   async function acompanharDidit() {
     mostrarRetorno("Conferindo sua verificação…", "Isso leva só alguns segundos.");
     for (let i = 0; i < 20; i++) {                       // ~1 minuto esperando a Didit decidir
       let s = null;
       try { s = await api.statusVerificacao(); } catch { /* tenta de novo */ }
-      if (s && (s.verificada || s.status === "aprovada")) {
+      const c = s && s.conferencia;
+      const aprovada = s && (s.verificada || s.status === "aprovada");
+      if (c) {                                           // a Didit aprovou: mostra como o nome foi conferido
+        const aoContinuar = aprovada
+          ? () => { window.Violet.disp.set("tutorial_pendente", true); ir(5); }
+          : s.status === "reprovada"
+            ? () => mostrarRetorno(...mensagemRecusa, { refazer: true })
+            : () => mostrarRetorno(...mensagemRevisao, { voltar: true });
+        return mostrarConferencia(c, aoContinuar);
+      }
+      if (aprovada) {                                    // aprovada sem detalhes (regra desligada)
         window.Violet.disp.set("tutorial_pendente", true);   // conta nova verificada: mostra o tutorial na Home
         return ir(5);
       }
@@ -125,8 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       await new Promise((ok) => setTimeout(ok, 3000));
     }
-    mostrarRetorno("Documento recebido!",
-      "Sua verificação está em análise. Você poderá usar o Violet assim que ela for aprovada.", { voltar: true });
+    mostrarRetorno(...mensagemRevisao, { voltar: true });
   }
   if (new URLSearchParams(location.search).has("didit")) acompanharDidit();
 });

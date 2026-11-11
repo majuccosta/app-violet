@@ -113,7 +113,9 @@ class VerificacaoStatusView(APIView):
         request.user.refresh_from_db(fields=["verificada"])
         situacao = v.status if v else ("aprovada" if request.user.verificada else "pendente")
         return Response({"verificada": request.user.verificada, "status": situacao,
-                         "modo": "didit" if didit_ativo() else "demo"})
+                         "modo": "didit" if didit_ativo() else "demo",
+                         # passo a passo da conferência do gênero/nome (só vem no momento em que a Didit aprova)
+                         "conferencia": getattr(v, "conferencia", None)})
 
 
 class DiditWebhookView(APIView):

@@ -9,7 +9,7 @@ from urllib.parse import urlsplit
 from django.conf import settings
 from django.core.mail import send_mail
 
-from . import didit
+from . import didit, ibge
 from .models import VerificacaoIdentidade
 
 log = logging.getLogger(__name__)
@@ -60,11 +60,78 @@ def iniciar_verificacao(usuaria, retorno=None):
     return {"modo": "didit", "url": sessao["url"]}
 
 
-def aplicar_status(verificacao, status_didit):
-    """Atualiza a verificação (e a usuária) com o status da Didit. Uma verificação aprovada nunca volta atrás."""
+def _exigir_mulher():
+    """O Violet é um app só para mulheres: por padrão, a verificação confere o gênero do documento."""
+    return getattr(settings, "DIDIT_EXIGIR_MULHER", True)
+
+
+def _aceitar_sem_genero():
+    """Alguns documentos (ex.: CNH) não trazem o gênero. Por padrão, nesse caso a verificação segue aprovada."""
+    return getattr(settings, "DIDIT_ACEITAR_SEM_GENERO", True)
+
+
+def _usar_nome_ibge():
+    """Quando o documento não informa o gênero, estima pelo primeiro nome (base do IBGE)."""
+    return getattr(settings, "VERIFICACAO_USAR_NOME_IBGE", True)
+
+
+def _avaliar(status_didit, decisao):
+    """Status final no Violet, somando o resultado da Didit e a regra 'só mulheres'.
+    Devolve (status, conferencia). Status: 'aprovada', 'reprovada' ou 'pendente' (pendente = aguarda revisão de
+    uma administradora). Conferencia: passo a passo da checagem de gênero/nome (o app mostra isso na tela), ou
+    None quando a Didit ainda não aprovou ou a regra está desligada."""
+    novo = didit.traduzir_status(status_didit)
+    if novo != VerificacaoIdentidade.Status.APROVADA or not _exigir_mulher():
+        return novo, None
+    genero = didit.genero_do_documento(decisao)
+    nome_doc = didit.nome_do_documento(decisao)
+    primeiro = nome_doc.split()[0].capitalize() if nome_doc.split() else ""
+    conf = {"genero_documento": genero, "nome": primeiro, "metodo": "documento", "classe": None, "pct_feminino": None}
+
+    def fim(status):
+        conf["resultado"] = str(getattr(status, "value", status))
+        return status, conf
+
+    if genero == "F":
+        return fim(novo)
+    if genero == "M":
+        log.info("Didit: documento masculino; verificação recusada (app só para mulheres).")
+        return fim(VerificacaoIdentidade.Status.REPROVADA)
+    # O documento não informa o gênero (ex.: CNH).
+    if _usar_nome_ibge():
+        conf["metodo"] = "ibge"
+        try:
+            a_ = ibge.analisar_nome(nome_doc, limite=getattr(settings, "IBGE_LIMITE", 0.98),
+                                    minimo=getattr(settings, "IBGE_MINIMO", 1000))
+        except ibge.IbgeErro as e:
+            log.warning("IBGE: não consegui conferir o nome; verificação segue pendente: %s", e)
+            conf["metodo"] = "indisponivel"
+            return fim(VerificacaoIdentidade.Status.PENDENTE)
+        conf["classe"], conf["pct_feminino"] = a_["classe"], a_["pct_feminino"]
+        if a_["classe"] == "F":
+            return fim(novo)
+        if a_["classe"] == "M":
+            log.info("Nome claramente masculino em documento sem gênero; verificação recusada.")
+            return fim(VerificacaoIdentidade.Status.REPROVADA)
+        return fim(VerificacaoIdentidade.Status.PENDENTE)      # ambíguo: revisão manual
+    conf["metodo"] = "nenhum"
+    return fim(novo if _aceitar_sem_genero() else VerificacaoIdentidade.Status.REPROVADA)
+
+
+def aplicar_status(verificacao, status_didit, decisao=None):
+    """Atualiza a verificação (e a usuária) com o status da Didit. Uma verificação aprovada nunca volta atrás.
+    Se a Didit aprovou e ainda não temos a decisão completa, busca para conferir o gênero do documento;
+    se não conseguir buscar, a verificação continua pendente (nunca aprova às cegas)."""
     if verificacao.status == VerificacaoIdentidade.Status.APROVADA:
         return verificacao
-    novo = didit.traduzir_status(status_didit)
+    if (didit.traduzir_status(status_didit) == VerificacaoIdentidade.Status.APROVADA and _exigir_mulher()
+            and decisao is None):
+        try:
+            decisao = didit.consultar_decisao(settings.DIDIT_API_KEY, verificacao.id_sessao_didit)
+        except didit.DiditErro as e:
+            log.warning("Didit: não consegui conferir o gênero da sessão %s: %s", verificacao.id_sessao_didit, e)
+            return verificacao
+    novo, verificacao.conferencia = _avaliar(status_didit, decisao)
     if novo != verificacao.status:
         verificacao.status = novo
         verificacao.save(update_fields=["status"])
@@ -79,7 +146,8 @@ def sincronizar(usuaria):
     v = usuaria.verificacoes.order_by("-criado_em", "-id").first()
     if v and v.status == VerificacaoIdentidade.Status.PENDENTE and v.id_sessao_didit and didit_ativo():
         try:
-            aplicar_status(v, didit.consultar_decisao(settings.DIDIT_API_KEY, v.id_sessao_didit).get("status"))
+            decisao = didit.consultar_decisao(settings.DIDIT_API_KEY, v.id_sessao_didit)
+            aplicar_status(v, decisao.get("status"), decisao)
         except didit.DiditErro as e:
             log.warning("Didit: não consegui consultar a sessão %s: %s", v.id_sessao_didit, e)
     return v

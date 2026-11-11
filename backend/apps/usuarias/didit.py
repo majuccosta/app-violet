@@ -55,6 +55,28 @@ def consultar_decisao(api_key, session_id, abrir=urllib.request.urlopen):
     return _chamar("GET", f"/session/{session_id}/decision/", api_key, None, abrir)
 
 
+def genero_do_documento(decisao):
+    """Gênero lido do documento pela Didit: 'F', 'M' ou 'U' (o documento não mostra). None se não veio nada.
+    Fica em decisao['id_verifications'][0]['gender']."""
+    try:
+        itens = (decisao or {}).get("id_verifications") or []
+        g = (itens[0] or {}).get("gender") if itens else None
+    except (AttributeError, IndexError, TypeError):
+        return None
+    g = (str(g).strip().upper() if g is not None else "")
+    return g if g in ("F", "M", "U") else None
+
+
+def nome_do_documento(decisao):
+    """Nome lido do documento pela Didit (completo, ou só o primeiro nome). '' se não veio."""
+    try:
+        itens = (decisao or {}).get("id_verifications") or []
+        item = itens[0] or {} if itens else {}
+    except (AttributeError, IndexError, TypeError):
+        return ""
+    return str(item.get("full_name") or item.get("first_name") or "").strip()
+
+
 def traduzir_status(status_didit):
     """Status da Didit -> status do Violet ('aprovada', 'reprovada' ou 'pendente').
     'In Review' (análise manual), 'In Progress' etc. continuam pendentes."""

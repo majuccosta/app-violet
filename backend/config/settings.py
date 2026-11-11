@@ -145,6 +145,10 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # Integrações externas (fase de integrações)
 DIDIT_API_KEY = env("DIDIT_API_KEY", "")
+DIDIT_WORKFLOW_ID = env("DIDIT_WORKFLOW_ID", "")          # id do workflow criado no console da Didit
+DIDIT_WEBHOOK_SECRET = env("DIDIT_WEBHOOK_SECRET", "")    # segredo do webhook (console da Didit)
+DIDIT_CALLBACK_URL = env("DIDIT_CALLBACK_URL", "")        # opcional: para onde a Didit devolve a usuária
+# Só com DIDIT_API_KEY e DIDIT_WORKFLOW_ID preenchidos a verificação real fica ligada; sem eles vale o modo demonstração.
 
 if not DEBUG:
     # Atrás do proxy do Render: confia no cabeçalho que diz que o acesso original era HTTPS

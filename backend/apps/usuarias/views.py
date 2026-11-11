@@ -1,3 +1,5 @@
+import logging
+
 from django.db.models import ProtectedError
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
@@ -8,7 +10,13 @@ from .serializers import (
     RecuperarSenhaSerializer, UsuariaSerializer, VerificacaoSerializer, VerificarCodigoSerializer,
 )
 from .models import Usuaria
-from .services import codigo_valido, enviar_codigo_recuperacao, verificar_documento
+from .didit import DiditErro
+from .services import (
+    codigo_valido, didit_ativo, enviar_codigo_recuperacao, iniciar_verificacao, processar_webhook, sincronizar,
+    verificar_documento,
+)
+
+log = logging.getLogger(__name__)
 
 
 class CadastroView(generics.CreateAPIView):
@@ -67,6 +75,8 @@ class VerificacaoView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
+        if didit_ativo():   # com a Didit ligada, ninguém pode pular a verificação real por este caminho
+            return Response({"detail": "Use a verificação de identidade pela Didit."}, status=status.HTTP_409_CONFLICT)
         ser = VerificacaoSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         v = verificar_documento(
@@ -76,6 +86,44 @@ class VerificacaoView(APIView):
             ser.validated_data.get("tipo_documento", "rg"),
         )
         return Response({"id": v.id, "status": v.status}, status=status.HTTP_201_CREATED)
+
+
+class VerificacaoIniciarView(APIView):
+    """POST /api/usuarias/verificacao/iniciar/  {retorno?}
+    -> {modo: 'demo'} | {modo: 'didit', url} | {modo: 'ja_verificada'}"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        if request.user.verificada:
+            return Response({"modo": "ja_verificada"})
+        try:
+            return Response(iniciar_verificacao(request.user, request.data.get("retorno")))
+        except DiditErro as e:
+            log.warning("Didit: falha ao criar sessão: %s", e)
+            return Response({"detail": "Não foi possível iniciar a verificação agora. Tente novamente em instantes."},
+                            status=status.HTTP_502_BAD_GATEWAY)
+
+
+class VerificacaoStatusView(APIView):
+    """GET /api/usuarias/verificacao/status/ -> {verificada, status, modo}. O app consulta isto ao voltar da Didit."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        v = sincronizar(request.user)
+        request.user.refresh_from_db(fields=["verificada"])
+        situacao = v.status if v else ("aprovada" if request.user.verificada else "pendente")
+        return Response({"verificada": request.user.verificada, "status": situacao,
+                         "modo": "didit" if didit_ativo() else "demo"})
+
+
+class DiditWebhookView(APIView):
+    """POST /api/usuarias/verificacao/webhook/ — aviso da Didit (confere a assinatura X-Signature-V2)."""
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        ok = processar_webhook(request.body, request.headers.get("X-Signature-V2", ""), request.headers.get("X-Timestamp", ""))
+        return Response({"ok": True}) if ok else Response(status=status.HTTP_401_UNAUTHORIZED)
 
 
 class RecuperarSenhaView(APIView):

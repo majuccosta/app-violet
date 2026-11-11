@@ -134,7 +134,21 @@ html[data-reduzir="1"] *, html[data-reduzir="1"] *::before, html[data-reduzir="1
 select option, select optgroup { background-color: var(--surface, #fff); color: var(--ink-900, #2a0a3d); }
 select option:checked { background-color: var(--violet-100, #efe3f8); }
 
-/* Celular: o fundo da página tem a mesma cor do app */
+
+/* Celular: o fundo da página combina com o app, também atrás das barras do Safari */
 @media (max-width: 639px) {
   html, body { background: var(--bg); }
+
+  /* Telas com cabeçalho colorido (início e conversas): topo da cor do cabeçalho, resto da cor do app */
+  html:has(.home-hero), html:has(.home-hero) body,
+  html:has(.convo-head), html:has(.convo-head) body {
+    background: linear-gradient(to bottom, #f3e0fb 0, #f3e0fb 140px, var(--bg) 140px);
+  }
+  html[data-theme="dark"]:has(.home-hero), html[data-theme="dark"]:has(.home-hero) body,
+  html[data-theme="dark"]:has(.convo-head), html[data-theme="dark"]:has(.convo-head) body {
+    background: linear-gradient(to bottom, #2d1946 0, #2d1946 140px, var(--bg) 140px);
+  }
+
+  /* Se o iPhone reservar área do relógio, o conteúdo do cabeçalho desce junto */
+  .home-hero, .convo-head { padding-top: calc(var(--sp-5) + env(safe-area-inset-top)); }
 }

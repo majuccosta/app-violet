@@ -192,6 +192,8 @@
   V.initials = (nome) => String(nome || "?").split(" ").filter(Boolean).slice(0, 2).map((p) => p[0]).join("").toUpperCase();
   V.loading = function (btn, on, label) {
     if (!btn) return;
+    btn.classList.toggle("is-loading", !!on);          // brilhos animados no botão (components.css)
+    btn.setAttribute("aria-busy", on ? "true" : "false");
     if (on) { btn.dataset.label = btn.innerHTML; btn.disabled = true; btn.textContent = label || "Aguarde…"; }
     else { btn.disabled = false; if (btn.dataset.label) btn.innerHTML = btn.dataset.label; }
   };

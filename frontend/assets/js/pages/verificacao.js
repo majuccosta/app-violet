@@ -14,10 +14,12 @@ document.addEventListener("DOMContentLoaded", () => {
     steps.forEach((s) => (s.hidden = Number(s.dataset.step) !== n));
     document.getElementById("retorno-didit").hidden = true;
     document.getElementById("progresso").style.width = `${((n - 1) / (total - 1)) * 100}%`;
+    document.getElementById("progresso").parentElement.parentElement.hidden = n === 1;   // sem barra solta na introdução
     document.getElementById("btn-voltar").style.visibility = n === total ? "hidden" : "visible";
     if (n === 4) analisar();
   };
 
+  document.getElementById("progresso").parentElement.parentElement.hidden = true;   // começa na introdução: sem barra
   document.getElementById("btn-voltar").addEventListener("click", () => (atual > 1 ? ir(atual - 1) : history.back()));
   document.querySelectorAll("[data-next]").forEach((b) => b.addEventListener("click", () => ir(atual + 1)));
 
@@ -83,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ---- Verificação real (Didit) ----
   document.getElementById("btn-comecar").addEventListener("click", async (e) => {
     const btn = e.currentTarget;
-    window.Violet.loading(btn, true, "Abrindo verificação…");
+    btn.disabled = true;
     try {
       const r = await api.iniciarVerificacao();
       if (r.modo === "didit" && r.url) { location.href = r.url; return; }   // a usuária segue para a página da Didit
@@ -92,7 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (err) {
       window.Violet.toast(err.message);
     }
-    window.Violet.loading(btn, false);
+    btn.disabled = false;
   });
 
   const retorno = {

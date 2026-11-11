@@ -24,6 +24,8 @@ const ENDPOINTS = {
   senha: "/usuarias/me/senha/",
   excluirConta: "/usuarias/me/excluir/",
   verificacao: "/usuarias/verificacao/",
+  verificacaoIniciar: "/usuarias/verificacao/iniciar/",
+  verificacaoStatus: "/usuarias/verificacao/status/",
   contatos: "/contatos/",
   conversas: "/conversas/",
   mensagens: (id) => `/conversas/${id}/mensagens/`,
@@ -237,6 +239,8 @@ const mock = {
     try { Object.keys(localStorage).filter((k) => k.startsWith("violet:") && !/tema|idioma/.test(k)).forEach((k) => localStorage.removeItem(k)); } catch { /* sem storage */ }
     return null;
   },
+  async iniciarVerificacao() { await wait(300); return { modo: "demo" }; },
+  async statusVerificacao() { await wait(300); return { verificada: true, status: "aprovada", modo: "demo" }; },
   async verificacao() {
     await wait(900);
     return { status: "aprovada", dados: { nome: "Maria Júlia de Carvalho Costa", nascimento: "14/05/2005", documento: "RG •••• 6789", validade: "01/01/2032", naturalidade: "Brasília — DF" } };
@@ -486,7 +490,10 @@ const real = {
   novaSenha: (d) => http(ENDPOINTS.novaSenha, { method: "POST", body: { destino: store.get("rec_destino"), codigo: store.get("rec_codigo"), senha: d.senha } })
     .then((r) => { store.set("rec_destino", null); store.set("rec_codigo", null); return r; }),
   me: () => http(ENDPOINTS.me).then((u) => ({ ...u, nome: u.nome_completo, primeiro_nome: u.nome_completo.split(" ")[0] })),
-  // Devolve o status e os dados do cadastro (a leitura do documento pela Didit ainda não existe)
+  // Verificação real (Didit): devolve {modo:'didit', url} para enviar a usuária, ou {modo:'demo'} sem a Didit
+  iniciarVerificacao: () => http(ENDPOINTS.verificacaoIniciar, { method: "POST", body: { retorno: `${location.origin}${location.pathname}?didit=1` } }),
+  statusVerificacao: () => http(ENDPOINTS.verificacaoStatus),
+  // Modo demonstração: devolve o status e os dados do cadastro (sem leitura do documento)
   verificacao: async (form) => {
     const r = await http(ENDPOINTS.verificacao, { method: "POST", form });
     const u = await http(ENDPOINTS.me);

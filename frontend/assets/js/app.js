@@ -198,6 +198,14 @@
     else { btn.disabled = false; if (btn.dataset.label) btn.innerHTML = btn.dataset.label; }
   };
 
+  /* Voltar pelo navegador (ou pelo botão voltar do celular) mostra a página como ela estava, guardada na memória.
+     Se o botão estava em "Salvando…" porque a pessoa tinha acabado de seguir para outra tela, ele voltaria congelado.
+     Ao reexibir a página, todo botão ocupado volta ao normal. */
+  window.addEventListener("pageshow", (e) => {
+    if (!e.persisted) return;
+    document.querySelectorAll('[aria-busy="true"]').forEach((b) => V.loading(b, false));
+  });
+
   /* Validação simples: campos com required / type=email / data-min */
   V.validate = function (form) {
     let ok = true;

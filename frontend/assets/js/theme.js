@@ -75,7 +75,7 @@
   aplicarDisp();
 
   /* Páginas que nunca ficam atrás do PIN (entrada, cadastro, emergência…) */
-  const LIVRES = ["index.html", "login.html", "cadastro.html", "recuperar-senha.html", "verificacao.html", "emergencia.html", "neutro.html", "boas-vindas.html", "termos.html", "politica.html"];
+  const LIVRES = ["index.html", "login.html", "cadastro.html", "completar-cadastro.html", "recuperar-senha.html", "verificacao.html", "emergencia.html", "neutro.html", "boas-vindas.html", "termos.html", "politica.html"];
   const arquivo = location.pathname.split("/").pop() || "index.html";
   window.Violet.paginaLivre = LIVRES.includes(arquivo);
   const desbloqueada = () => { try { return sessionStorage.getItem("violet:desbloqueado") === "1"; } catch { return false; } };

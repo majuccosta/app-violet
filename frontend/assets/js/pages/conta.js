@@ -3,9 +3,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const { api, initials, icon, validate, loading, toast, phoneMask, openSheet, closeSheet } = window.Violet;
   const $ = (id) => document.getElementById(id);
   const eu = await api.me();
-  // Depois da verificação, o nome e a data de nascimento vêm do documento e não mudam.
+  // Depois da verificação, o nome vem do documento e não muda.
+  // A data de nascimento é informada uma vez (cadastro) e depois fica travada.
   const nomeBloqueado = !!eu.verificada;
-  const nascBloqueado = !!eu.verificada && !!eu.data_nascimento;
+  const nascBloqueado = !!eu.data_nascimento;
 
   /* Limpa o erro do campo assim que a pessoa volta a digitar */
   document.addEventListener("input", (e) => e.target.closest?.(".field")?.classList.remove("is-invalid"));
@@ -32,9 +33,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     wrap.insertAdjacentHTML("beforeend", icon("lock", "sm"));
   };
   if (nomeBloqueado) trancar(nome);
-  if (nomeBloqueado) {
+  if (nomeBloqueado || nascBloqueado) {
     const dica = $("dica-bloqueio");
-    if (!nascBloqueado) dica.lastChild.textContent = " O nome vem do seu documento verificado e não pode ser alterado.";
+    dica.lastChild.textContent = nomeBloqueado && nascBloqueado
+      ? " O nome vem do seu documento verificado e não pode ser alterado. A data de nascimento também fica fixa; para corrigir, fale com o suporte."
+      : nomeBloqueado ? " O nome vem do seu documento verificado e não pode ser alterado."
+      : " A data de nascimento não pode ser alterada depois de informada. Para corrigir, fale com o suporte.";
     dica.hidden = false;
   }
   if (nascBloqueado) {

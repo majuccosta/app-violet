@@ -2,6 +2,17 @@
 document.addEventListener("DOMContentLoaded", () => {
   const { api, validate, loading, toast } = window.Violet;
 
+  /* Para onde ir depois de entrar: sem data de nascimento (conta Google nova) → completar cadastro;
+     sem verificação de identidade → verificação; senão, a home. */
+  const destinoPosLogin = async () => {
+    try {
+      const eu = await api.me();
+      if (eu && !eu.data_nascimento) return "completar-cadastro.html";
+      if (eu && eu.verificada === false) return "verificacao.html";
+    } catch { /* segue para a home */ }
+    return "home.html";
+  };
+
   /* ---------- Login ---------- */
   const formLogin = document.getElementById("form-login");
   formLogin?.addEventListener("submit", async (e) => {
@@ -11,10 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loading(btn, true, "Entrando…");
     try {
       await api.login({ email: formLogin.email.value.trim(), senha: formLogin.senha.value });
-      // Conta sem verificação de identidade concluída vai para a verificação
-      let destino = "home.html";
-      try { const eu = await api.me(); if (eu && eu.verificada === false) destino = "verificacao.html"; } catch { /* segue para a home */ }
-      location.href = destino;
+      location.href = await destinoPosLogin();
     } catch (err) { toast(err.message); loading(btn, false); }
   });
 
@@ -74,9 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
         caixaGoogle.style.opacity = ".5"; caixaGoogle.style.pointerEvents = "none";
         try {
           await api.loginGoogle(credential);
-          let destino = "home.html";
-          try { const eu = await api.me(); if (eu && eu.verificada === false) destino = "verificacao.html"; } catch { /* segue para a home */ }
-          location.href = destino;
+          location.href = await destinoPosLogin();
         } catch (err) {
           toast(err.message);
           caixaGoogle.style.opacity = ""; caixaGoogle.style.pointerEvents = "";

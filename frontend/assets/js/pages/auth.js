@@ -141,8 +141,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const { valido } = await api.verificarCodigo({ codigo: otp.map((o) => o.value).join("") });
     valido ? ir(3) : toast("Código inválido. Confira e tente de novo.");
   });
-  document.getElementById("btn-reenviar").addEventListener("click", () => toast("Enviamos um novo código."));
-
+  
+  const btnReenviar = document.getElementById("btn-reenviar");
+  btnReenviar.addEventListener("click", async () => {
+    if (btnReenviar.disabled) return;
+    const destino = document.getElementById("rec-email").value.trim();
+    const rotulo = btnReenviar.textContent;
+    btnReenviar.disabled = true;
+    try { await api.recuperarSenha({ destino }); toast("Enviamos um novo código."); }
+    catch (err) { toast(err.message); }
+    // espera 30 s antes de permitir outro envio (evita cliques repetidos)
+    let falta = 30;
+    const t = setInterval(() => {
+      falta--;
+      if (falta <= 0) { clearInterval(t); btnReenviar.disabled = false; btnReenviar.textContent = rotulo; }
+      else btnReenviar.textContent = `${rotulo} (${falta}s)`;
+    }, 1000);
+  });
   const formSenha = document.getElementById("form-senha");
   formSenha.addEventListener("submit", async (e) => {
     e.preventDefault();

@@ -78,6 +78,10 @@
   const LIVRES = ["index.html", "login.html", "cadastro.html", "completar-cadastro.html", "recuperar-senha.html", "verificacao.html", "emergencia.html", "neutro.html", "boas-vindas.html", "termos.html", "politica.html"];
   const arquivo = location.pathname.split("/").pop() || "index.html";
   window.Violet.paginaLivre = LIVRES.includes(arquivo);
+  /* Conta recém-verificada: a verificação deixa "tutorial_pendente" marcado; ao chegar na Home, mostra o tutorial uma vez */
+  if (arquivo === "home.html" && window.Violet.disp.get("tutorial_pendente", false)) {
+    location.replace("boas-vindas.html");
+  }
   const desbloqueada = () => { try { return sessionStorage.getItem("violet:desbloqueado") === "1"; } catch { return false; } };
   window.Violet.precisaPin = () => !window.Violet.paginaLivre && !!window.Violet.disp.get("pin_hash", null) && !desbloqueada();
   if (window.Violet.precisaPin()) raiz.classList.add("is-locked");   // esconde o conteúdo até digitar o PIN

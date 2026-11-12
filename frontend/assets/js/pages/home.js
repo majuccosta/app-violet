@@ -1,8 +1,7 @@
 /* VIOLET — Tela inicial: saudação por horário, painel de proteção, próximo trajeto, humor, atalhos, conversas e notificações */
 document.addEventListener("DOMContentLoaded", async () => {
   const { api, esc, initials, icon, toast } = window.Violet;
-  // Primeira vez no app: mostra o tutorial de boas-vindas
-  if (window.Violet.disp.get("tutorial_pendente", false) && !window.Violet.disp.get("tutorial_visto", false)) { location.replace("boas-vindas.html"); return; }
+  // O tutorial de boas-vindas, para conta recém-verificada, é aberto pelo theme.js (marca "tutorial_pendente")
   const $ = (id) => document.getElementById(id);
   const lang = () => document.documentElement.lang || "pt-BR";
   let falhou = false;   // se algum pedido falhar, avisa em vez de deixar a tela vazia sem explicação
@@ -135,14 +134,30 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("sub-denuncia").textContent = andamento ? `${andamento} em andamento` : "Acompanhe o andamento";
 
   /* ---------- Conversas ---------- */
-  $("lista-pessoas").innerHTML = conversas.slice(0, 6).map((c) => `
-    <a href="chat.html?id=${c.id}" class="home-person">
-      <span class="home-person__ring">
-        <span class="avatar${c.tipo === "grupo" ? " avatar--group" : ""}" data-tone="${c.tone}">${c.tipo === "grupo" ? icon("users", "sm") : initials(c.nome)}</span>
+  const recentes = conversas.slice(0, 3);
+  $("lista-pessoas").innerHTML = recentes.length ? recentes.map((c) => `
+    <a href="chat.html?id=${c.id}" class="home-convo${c.nao_lidas ? " is-unread" : ""}">
+      <span class="avatar${c.tipo === "grupo" ? " avatar--group" : ""}" data-tone="${c.tone}">${c.tipo === "grupo" ? icon("users", "sm") : esc(initials(c.nome))}</span>
+      <span class="home-convo__body">
+        <span class="home-convo__nome">${esc(c.nome)}</span>
+        <span class="home-convo__previa">${esc(c.ultima || "Diga um oi 💜")}</span>
       </span>
-      ${c.nao_lidas ? `<span class="badge badge--count">${c.nao_lidas}</span>` : ""}
-      <span>${esc(c.curto || c.nome)}</span>
-    </a>`).join("");
+      <span class="home-convo__meta">
+        <span class="home-convo__hora">${esc(c.hora || "")}</span>
+        ${c.nao_lidas ? `<span class="badge badge--count">${c.nao_lidas}</span>` : ""}
+      </span>
+    </a>`).join("") : `
+    <div class="home-convos__vazio">
+      <span class="home-convos__art">${icon("message")}</span>
+      <b>Nenhuma conversa ainda</b>
+      <span>Encontre outras usuárias do Violet e comece a conversar.</span>
+    </div>`;
+  // Pedidos de conexão recebidos (não atrasa a tela: chega quando chegar)
+  Promise.resolve(api.listarConexoes("recebidas")).catch(() => []).then((pedidos) => {
+    if (!pedidos || !pedidos.length) return;
+    $("convos-pedidos-txt").textContent = pedidos.length === 1 ? "1 pedido de conexão" : `${pedidos.length} pedidos de conexão`;
+    $("convos-pedidos").hidden = false;
+  });
 
   /* ---------- Notificações ---------- */
   document.getElementById("bell-dot").hidden = !notificacoes.some((n) => !n.lida);

@@ -499,15 +499,19 @@ a.notif:hover { transform: translateX(3px); box-shadow: var(--shadow-sm); }
 .tile--mint { background: var(--tile-mint); } .tile--mint .tile__ico { color: var(--tile-mint-fg); }
 
 /* Conversas */
-.home-people { display: flex; gap: var(--sp-4); overflow-x: auto; padding: 6px 2px 4px; scrollbar-width: none; }
+.home-people { display: flex; gap: var(--sp-4); overflow-x: auto; padding: 8px 4px 6px; margin: 0 -4px; scrollbar-width: none; scroll-snap-type: x proximity; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
 .home-people::-webkit-scrollbar { display: none; }
-.home-person { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 0 0 auto; min-width: 58px; font-size: var(--fs-xs); font-weight: 500; color: var(--ink-700); transition: transform .3s var(--spring); }
-.home-person:hover { transform: translateY(-2px); }
-.home-person__ring { padding: 3px; border-radius: 50%; background: var(--line); }
-.home-person__ring.is-live { background: linear-gradient(140deg, #ff8ad2, #c75ad8 50%, #8a4be0); box-shadow: 0 6px 14px rgba(199, 90, 214, .26); }
-.home-person__ring .avatar { width: 50px; height: 50px; border: 3px solid var(--surface); }
+.home-person { position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 0 0 auto; width: 66px; scroll-snap-align: start; font-size: var(--fs-xs); font-weight: 500; color: var(--ink-700); transition: transform .3s var(--spring); }
+.home-person:hover { transform: translateY(-3px); }
+.home-person:active { transform: scale(.95); }
+.home-person__ring { padding: 3px; border-radius: 50%; background: linear-gradient(140deg, var(--violet-200), var(--orchid-100)); box-shadow: 0 4px 12px rgba(162, 63, 168, .12); }
+.home-person__ring.is-live { background: linear-gradient(140deg, #ff8ad2, #c75ad8 50%, #8a4be0); box-shadow: 0 6px 16px rgba(199, 90, 214, .32); }
+.home-person__ring .avatar { width: 56px; height: 56px; font-size: var(--fs-md); border: 3px solid var(--surface); }
 .home-person__ring .avatar .dot { display: none; }
-.home-person .badge--count { position: absolute; top: -4px; right: 0; box-shadow: 0 3px 8px rgba(199, 90, 214, .4); }
+.home-person__ring .avatar.avatar--group { border-radius: 50%; }
+.home-person__nome { max-width: 100%; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.home-person .badge--count { position: absolute; top: -2px; right: 2px; box-shadow: 0 3px 8px rgba(199, 90, 214, .4); }
+.home-people__vazio { margin: 0; padding: var(--sp-3) 0; color: var(--ink-500); font-size: var(--fs-sm); }
 
 /* Notificações */
 .home-notifs { display: flex; flex-direction: column; gap: var(--sp-3); }

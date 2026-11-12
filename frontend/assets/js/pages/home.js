@@ -134,30 +134,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("sub-denuncia").textContent = andamento ? `${andamento} em andamento` : "Acompanhe o andamento";
 
   /* ---------- Conversas ---------- */
-  const recentes = conversas.slice(0, 3);
-  $("lista-pessoas").innerHTML = recentes.length ? recentes.map((c) => `
-    <a href="chat.html?id=${c.id}" class="home-convo${c.nao_lidas ? " is-unread" : ""}">
-      <span class="avatar${c.tipo === "grupo" ? " avatar--group" : ""}" data-tone="${c.tone}">${c.tipo === "grupo" ? icon("users", "sm") : esc(initials(c.nome))}</span>
-      <span class="home-convo__body">
-        <span class="home-convo__nome">${esc(c.nome)}</span>
-        <span class="home-convo__previa">${esc(c.ultima || "Diga um oi 💜")}</span>
+  $("lista-pessoas").innerHTML = conversas.length ? conversas.slice(0, 6).map((c) => `
+    <a href="chat.html?id=${c.id}" class="home-person">
+      <span class="home-person__ring${c.nao_lidas ? " is-live" : ""}">
+        <span class="avatar${c.tipo === "grupo" ? " avatar--group" : ""}" data-tone="${c.tone}">${c.tipo === "grupo" ? icon("users", "sm") : esc(initials(c.nome))}</span>
       </span>
-      <span class="home-convo__meta">
-        <span class="home-convo__hora">${esc(c.hora || "")}</span>
-        ${c.nao_lidas ? `<span class="badge badge--count">${c.nao_lidas}</span>` : ""}
-      </span>
-    </a>`).join("") : `
-    <div class="home-convos__vazio">
-      <span class="home-convos__art">${icon("message")}</span>
-      <b>Nenhuma conversa ainda</b>
-      <span>Encontre outras usuárias do Violet e comece a conversar.</span>
-    </div>`;
-  // Pedidos de conexão recebidos (não atrasa a tela: chega quando chegar)
-  Promise.resolve(api.listarConexoes("recebidas")).catch(() => []).then((pedidos) => {
-    if (!pedidos || !pedidos.length) return;
-    $("convos-pedidos-txt").textContent = pedidos.length === 1 ? "1 pedido de conexão" : `${pedidos.length} pedidos de conexão`;
-    $("convos-pedidos").hidden = false;
-  });
+      ${c.nao_lidas ? `<span class="badge badge--count">${c.nao_lidas}</span>` : ""}
+      <span class="home-person__nome">${esc(c.curto || c.nome)}</span>
+    </a>`).join("") : `<p class="home-people__vazio">Suas conversas aparecem aqui.</p>`;
 
   /* ---------- Notificações ---------- */
   document.getElementById("bell-dot").hidden = !notificacoes.some((n) => !n.lida);

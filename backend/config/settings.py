@@ -140,8 +140,12 @@ SIMPLE_JWT = {
 # Front-end rodando no Live Server do VS Code / http.server
 CORS_ALLOWED_ORIGINS = env("CORS_ORIGINS", "http://localhost:5500,http://127.0.0.1:5500,http://localhost:8080").split(",")
 
-# E-mails (recuperação de senha): no terminal em desenvolvimento
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# E-mails (recuperação de senha). Com BREVO_API_KEY o e-mail é enviado de verdade (API HTTP da Brevo, funciona no Render
+# grátis, que bloqueia SMTP). Sem a chave, o e-mail aparece no terminal (desenvolvimento).
+BREVO_API_KEY = env("BREVO_API_KEY", "")
+DEFAULT_FROM_EMAIL = f"Violet <{env('EMAIL_REMETENTE', 'violet@localhost')}>"   # EMAIL_REMETENTE: e-mail confirmado na Brevo
+EMAIL_BACKEND = ("apps.usuarias.email_brevo.BrevoEmailBackend" if BREVO_API_KEY
+                 else "django.core.mail.backends.console.EmailBackend")
 
 # Integrações externas (fase de integrações)
 DIDIT_API_KEY = env("DIDIT_API_KEY", "")

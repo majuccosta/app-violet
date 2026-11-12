@@ -3,11 +3,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const { api, validate, loading, toast } = window.Violet;
   const IDADE_MINIMA = 16;
 
-  // "?previa" só mostra a tela (sem exigir login e sem salvar nada), para conferir o visual
-  const previa = new URLSearchParams(location.search).has("previa");
-
   // Quem já tem data (ou não está logada) não precisa desta tela
-  if (!previa) try {
+  try {
     const eu = await api.me();
     if (eu && eu.data_nascimento) return void (location.replace(eu.verificada === false ? "verificacao.html" : "home.html"));
   } catch { return void location.replace("login.html"); }
@@ -31,7 +28,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       toast(`Informe uma data de nascimento válida (mínimo de ${IDADE_MINIMA} anos).`);
       return form.nascimento.focus();
     }
-    if (previa) return toast("Prévia: nada foi salvo.");
     const btn = form.querySelector("[type=submit]");
     loading(btn, true, "Salvando…");
     try {

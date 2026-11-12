@@ -6,6 +6,8 @@ class Usuaria(AbstractUser):
     """Usuária do app. A identidade é guardada aqui e NUNCA exposta em denúncias anônimas."""
     email = models.EmailField("e-mail", unique=True)
     nome_completo = models.CharField(max_length=150)
+    # Como a pessoa quer ser chamada no app (o nome real, do documento, não muda)
+    apelido = models.CharField("apelido", max_length=30, blank=True)
     data_nascimento = models.DateField(null=True, blank=True)
     telefone = models.CharField(max_length=20, blank=True)
     verificada = models.BooleanField(default=False)
@@ -29,6 +31,11 @@ class Usuaria(AbstractUser):
 
     def __str__(self):
         return self.nome_completo or self.email
+
+    @property
+    def nome_exibicao(self):
+        """O que as outras usuárias veem: o apelido, ou só o primeiro nome."""
+        return self.apelido or (self.nome_completo.split(" ")[0] if self.nome_completo else "")
 
 
 class Preferencias(models.Model):

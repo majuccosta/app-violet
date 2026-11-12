@@ -38,7 +38,7 @@ class GrupoTrajetoSerializer(serializers.ModelSerializer):
             elif getattr(u, "modo_anonimo", False):
                 nome = "Usuária verificada"
             else:
-                nome = u.nome_completo.split(" ")[0]
+                nome = u.nome_exibicao
             lista.append({"id": u.id, "nome": nome, "tone": 0 if sou_eu else (u.id % 4) + 1, "eu": sou_eu})
         return lista
 
@@ -85,7 +85,7 @@ class SolicitacaoAcompanhamentoSerializer(serializers.ModelSerializer):
 
     def get_nome(self, obj):
         u = obj.solicitante
-        return "Usuária verificada" if u.modo_anonimo else u.nome_completo.split(" ")[0]
+        return "Usuária verificada" if u.modo_anonimo else u.nome_exibicao
 
     def get_curso(self, obj):
         return "Usuária verificada"  # TODO (integrações): curso vindo da verificação de identidade

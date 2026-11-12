@@ -24,7 +24,7 @@ class MensagemSerializer(serializers.ModelSerializer):
         part = obj.conversa.participantes.filter(usuaria_id=obj.autora_id).first()
         if obj.conversa.tipo == Conversa.Tipo.ANONIMA or (part and part.anonima):
             return "Usuária anônima"
-        return obj.autora.nome_completo.split(" ")[0]
+        return obj.autora.nome_exibicao
 
 
 class ConversaSerializer(serializers.ModelSerializer):
@@ -79,7 +79,7 @@ class ConversaSerializer(serializers.ModelSerializer):
         # Anonimato: nunca expõe o nome de quem escolheu ficar anônima
         if outra.anonima or obj.tipo == Conversa.Tipo.ANONIMA:
             return "Usuária anônima"
-        return outra.usuaria.nome_completo.split(" ")[0]
+        return outra.usuaria.nome_exibicao
 
     def get_criadora(self, obj):
         return obj.criadora_id is not None and obj.criadora_id == self.context["request"].user.id
@@ -91,7 +91,7 @@ class ConversaSerializer(serializers.ModelSerializer):
         eu = self.context["request"].user
         lista = []
         for p in obj.participantes.exclude(usuaria=eu).select_related("usuaria"):
-            nome = "Usuária anônima" if p.anonima else p.usuaria.nome_completo.split(" ")[0]
+            nome = "Usuária anônima" if p.anonima else p.usuaria.nome_exibicao
             lista.append({"id": f"u{p.usuaria_id}", "nome": nome, "tone": (p.usuaria_id % 4) + 1})
         for i, m in enumerate(obj.membros or []):
             lista.append({"id": f"c{m.get('id') if m.get('id') is not None else i}", "nome": m["nome"], "tone": (i % 4) + 1})

@@ -62,15 +62,16 @@ class UsuariaSerializer(serializers.ModelSerializer):
         return value.upper()
 
     def validate(self, attrs):
-        # Depois da verificação, o nome e a data de nascimento vêm do documento e não mudam
-        # (a data só pode ser informada se ainda estiver vazia, em contas verificadas antes dessa regra).
+        # Depois da verificação, o nome vem do documento e não muda.
         if self.instance and self.instance.verificada:
             if "nome_completo" in attrs and attrs["nome_completo"] != self.instance.nome_completo:
                 raise serializers.ValidationError({"nome_completo": "Vem do seu documento verificado e não pode ser alterado."})
-            if self.instance.data_nascimento and "data_nascimento" in attrs \
-                    and attrs["data_nascimento"] != self.instance.data_nascimento:
-                raise serializers.ValidationError(
-                    {"data_nascimento": "Vem do seu documento verificado e não pode ser alterada."})
+        # A data de nascimento só pode ser informada uma vez (no cadastro, ou na tela "Complete seu cadastro" de quem entra
+        # pelo Google). Depois de preenchida, só o suporte/admin corrige.
+        if self.instance and self.instance.data_nascimento and "data_nascimento" in attrs \
+                and attrs["data_nascimento"] != self.instance.data_nascimento:
+            raise serializers.ValidationError(
+                {"data_nascimento": "A data de nascimento não pode ser alterada. Se estiver errada, fale com o suporte."})
         return attrs
 
     def update(self, instance, validated_data):

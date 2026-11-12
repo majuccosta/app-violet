@@ -149,15 +149,12 @@ def aplicar_status(verificacao, status_didit, decisao=None):
         usuaria = verificacao.usuaria
         usuaria.verificada = True
         campos = ["verificada"]
-        # Depois de verificada, o nome e a data de nascimento são os do DOCUMENTO (não os do e-mail/Google)
+        # Depois de verificada, o nome é o do DOCUMENTO (não o do e-mail/Google).
+        # A data de nascimento NÃO é copiada: a leitura do documento falha com frequência; vale a do cadastro.
         nome = nome_legivel(didit.nome_completo_do_documento(decisao))[:150]
         if nome:
             usuaria.nome_completo = nome
             campos.append("nome_completo")
-        nasc = didit.nascimento_do_documento(decisao)
-        if nasc:
-            usuaria.data_nascimento = nasc
-            campos.append("data_nascimento")
         usuaria.save(update_fields=campos)
     return verificacao
 

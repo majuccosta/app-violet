@@ -1,4 +1,4 @@
-"""Depois da verificação, o perfil passa a ter o nome e a data de nascimento do DOCUMENTO.
+"""Depois da verificação, o perfil passa a ter o nome do DOCUMENTO (a data de nascimento continua a do cadastro).
 Rode: python manage.py test apps.usuarias.test_nome_documento"""
 from datetime import date
 
@@ -57,12 +57,19 @@ class AprovacaoCopiaDadosTests(_TestCase):
         self.u.save()
         self.v = VerificacaoIdentidade.objects.create(usuaria=self.u, id_sessao_didit="s1")
 
-    def test_aprovada_troca_o_nome_e_o_nascimento_pelos_do_documento(self):
-        services.aplicar_status(self.v, "Approved", decisao())
+    def test_aprovada_troca_o_nome_pelo_do_documento_e_nao_mexe_no_nascimento(self):
+        self.u.data_nascimento = date(2004, 3, 2)
+        self.u.save()
+        services.aplicar_status(self.v, "Approved", decisao(nascimento="2005-05-14"))
         self.u.refresh_from_db()
         self.assertTrue(self.u.verificada)
         self.assertEqual(self.u.nome_completo, "Maria Júlia de Carvalho Costa")
-        self.assertEqual(self.u.data_nascimento, date(2005, 5, 14))
+        self.assertEqual(self.u.data_nascimento, date(2004, 3, 2))
+
+    def test_aprovada_nao_preenche_nascimento_vazio(self):
+        services.aplicar_status(self.v, "Approved", decisao(nascimento="2005-05-14"))
+        self.u.refresh_from_db()
+        self.assertIsNone(self.u.data_nascimento)
 
     def test_sem_nome_no_documento_mantem_o_que_tinha(self):
         services.aplicar_status(self.v, "Approved", decisao(nome=None, nascimento=None))

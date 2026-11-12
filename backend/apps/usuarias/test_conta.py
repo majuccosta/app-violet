@@ -52,6 +52,23 @@ class NomeENascimentoTests(TestCase):
         u.refresh_from_db()
         self.assertEqual(u.data_nascimento, date(2003, 5, 10))
 
+    def test_nascimento_preenchido_tambem_nao_muda_antes_de_verificar(self):
+        u = criar_usuaria()
+        u.verificada = False
+        u.data_nascimento = date(2003, 5, 10)
+        u.save()
+        r = cliente_logado(u).patch("/api/usuarias/me/", {"data_nascimento": "2000-01-01"}, format="json")
+        self.assertEqual(r.status_code, 400)
+        u.refresh_from_db()
+        self.assertEqual(u.data_nascimento, date(2003, 5, 10))
+
+    def test_mandar_a_mesma_data_de_novo_nao_da_erro(self):
+        u = criar_usuaria()
+        u.data_nascimento = date(2003, 5, 10)
+        u.save()
+        r = cliente_logado(u).patch("/api/usuarias/me/", {"data_nascimento": "2003-05-10", "telefone": "61999990000"}, format="json")
+        self.assertEqual(r.status_code, 200)
+
     def test_nascimento_segue_as_regras_de_idade(self):
         u = criar_usuaria()
         c = cliente_logado(u)

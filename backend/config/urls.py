@@ -1,5 +1,6 @@
 """Rotas da API Violet. Os caminhos batem com frontend/assets/js/api.js (ENDPOINTS)."""
 from django.contrib import admin
+from django.http import JsonResponse
 from django.urls import include, path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
@@ -7,7 +8,13 @@ from apps.usuarias.views import (
     CadastroView, GoogleLoginView, NovaSenhaView, RecuperarSenhaView, VerificarCodigoView,
 )
 
+def saude(request):
+    """GET /api/saude/ — responde 200 sem login. Serve para o UptimeRobot manter a API acordada no Render."""
+    return JsonResponse({"status": "ok"})
+
+
 api = [
+    path("saude/", saude, name="saude"),
     # Autenticação
     path("auth/cadastro/", CadastroView.as_view(), name="cadastro"),
     path("auth/login/", TokenObtainPairView.as_view(), name="login"),

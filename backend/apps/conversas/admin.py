@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Conversa, Participante, Mensagem
+from .models import Conexao, Conversa, Participante, Mensagem
 
 
 @admin.register(Conversa)
@@ -12,3 +12,9 @@ class ConversaAdmin(admin.ModelAdmin):
 
 admin.site.register(Participante)
 admin.site.register(Mensagem)
+
+
+@admin.register(Conexao)
+class ConexaoAdmin(admin.ModelAdmin):
+    list_display = ("id", "de", "para", "status", "criado_em")
+    list_filter = ("status",)

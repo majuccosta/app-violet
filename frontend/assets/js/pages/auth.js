@@ -52,9 +52,47 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (err) { toast(err.message); loading(btn, false); }
   });
 
-  document.querySelectorAll("[data-social]").forEach((b) =>
-    b.addEventListener("click", () => toast(`Login com ${b.dataset.social} será ativado na fase de integrações.`))
-  );
+  /* ---------- Entrar / cadastrar com Google ----------
+     O botão é o oficial do Google (Google Identity Services). Ele devolve um "credential" que o servidor confere.
+     Conta nova entra sem verificação de identidade e segue para a verificação (Didit), como no cadastro normal. */
+  const caixaGoogle = document.getElementById("google-botao");
+  if (caixaGoogle) {
+    const divisor = document.getElementById("google-divisor");
+    const esconder = () => { caixaGoogle.style.display = "none"; if (divisor) divisor.hidden = true; };
+    const clientId = API_CONFIG.GOOGLE_CLIENT_ID;
+    if (!clientId) esconder();
+    else {
+      const esperarGoogle = () => new Promise((ok, falha) => {
+        const inicio = Date.now();
+        (function tentar() {
+          if (window.google && google.accounts && google.accounts.id) return ok();
+          if (Date.now() - inicio > 8000) return falha();
+          setTimeout(tentar, 100);
+        })();
+      });
+      const aoReceber = async ({ credential }) => {
+        caixaGoogle.style.opacity = ".5"; caixaGoogle.style.pointerEvents = "none";
+        try {
+          await api.loginGoogle(credential);
+          let destino = "home.html";
+          try { const eu = await api.me(); if (eu && eu.verificada === false) destino = "verificacao.html"; } catch { /* segue para a home */ }
+          location.href = destino;
+        } catch (err) {
+          toast(err.message);
+          caixaGoogle.style.opacity = ""; caixaGoogle.style.pointerEvents = "";
+        }
+      };
+      esperarGoogle().then(() => {
+        google.accounts.id.initialize({ client_id: clientId, callback: aoReceber, ux_mode: "popup", use_fedcm_for_prompt: true });
+        google.accounts.id.renderButton(caixaGoogle, {
+          type: "standard", shape: "pill", size: "large", locale: "pt-BR",
+          text: caixaGoogle.dataset.texto || "continue_with",
+          theme: document.documentElement.dataset.theme === "dark" ? "filled_black" : "outline",
+          width: Math.min(400, caixaGoogle.parentElement.clientWidth || 320),
+        });
+      }).catch(() => { caixaGoogle.textContent = "Não foi possível carregar o login com Google. Verifique sua internet."; caixaGoogle.style.fontSize = "var(--fs-sm)"; });
+    }
+  }
 
   /* ---------- Recuperar senha (4 passos na mesma página) ---------- */
   const steps = document.querySelectorAll("[data-step]");

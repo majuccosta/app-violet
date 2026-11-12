@@ -9,8 +9,8 @@ from urllib.parse import urlsplit
 from django.conf import settings
 from django.core.mail import send_mail
 
-from . import didit, ibge
-from .models import VerificacaoIdentidade
+from . import didit, google, ibge
+from .models import Preferencias, Usuaria, VerificacaoIdentidade
 
 log = logging.getLogger(__name__)
 
@@ -193,3 +193,28 @@ def enviar_codigo_recuperacao(usuaria):
         f"Seu código é {_codigo(usuaria, _janela_atual())}. Ele vale por 15 minutos.",
         None, [usuaria.email], fail_silently=True,
     )
+
+
+# ---------- Entrar com Google ----------
+def google_ativo():
+    return bool(getattr(settings, "GOOGLE_CLIENT_ID", ""))
+
+
+def entrar_com_google(credencial):
+    """Confere o token do Google e devolve a usuária (cria a conta na primeira vez).
+    A conta nova entra SEM verificação de identidade: ela ainda passa pela Didit (e pela regra 'só mulheres')."""
+    info = google.verificar_credencial(credencial, getattr(settings, "GOOGLE_CLIENT_ID", ""))
+    email = info["email"]
+    permitidos = [d.strip().lower().lstrip("@") for d in getattr(settings, "GOOGLE_DOMINIOS_PERMITIDOS", []) if d.strip()]
+    if permitidos and email.rsplit("@", 1)[-1] not in permitidos:
+        raise google.GoogleErro("Use o e-mail da sua instituição para entrar com o Google.", "dominio")
+    usuaria = Usuaria.objects.filter(email__iexact=email).first()
+    if usuaria:
+        if not usuaria.is_active:
+            raise google.GoogleErro("Esta conta está desativada.", "dominio")
+        return usuaria
+    usuaria = Usuaria(username=email, email=email, nome_completo=(info["nome"] or email.split("@")[0])[:150])
+    usuaria.set_unusable_password()      # entra sempre pelo Google; pode definir senha depois em "Esqueci minha senha"
+    usuaria.save()
+    Preferencias.objects.create(usuaria=usuaria)
+    return usuaria

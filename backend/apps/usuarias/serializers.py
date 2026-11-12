@@ -75,12 +75,20 @@ class AlterarSenhaSerializer(serializers.Serializer):
 
 
 class ExcluirContaSerializer(serializers.Serializer):
-    senha = serializers.CharField(write_only=True)
+    senha = serializers.CharField(write_only=True, required=False, allow_blank=True)
 
     def validate_senha(self, value):
-        if not self.context["request"].user.check_password(value):
+        usuaria = self.context["request"].user
+        if not usuaria.has_usable_password():   # conta criada com Google não tem senha: o login já a identifica
+            return value
+        if not usuaria.check_password(value):
             raise serializers.ValidationError("Senha incorreta.")
         return value
+
+    def validate(self, attrs):
+        if self.context["request"].user.has_usable_password() and not attrs.get("senha"):
+            raise serializers.ValidationError({"senha": "Informe sua senha."})
+        return attrs
 
 
 class CadastroSerializer(serializers.ModelSerializer):

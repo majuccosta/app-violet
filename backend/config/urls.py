@@ -3,12 +3,15 @@ from django.contrib import admin
 from django.urls import include, path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from apps.usuarias.views import CadastroView, NovaSenhaView, RecuperarSenhaView, VerificarCodigoView
+from apps.usuarias.views import (
+    CadastroView, GoogleLoginView, NovaSenhaView, RecuperarSenhaView, VerificarCodigoView,
+)
 
 api = [
     # Autenticação
     path("auth/cadastro/", CadastroView.as_view(), name="cadastro"),
     path("auth/login/", TokenObtainPairView.as_view(), name="login"),
+    path("auth/google/", GoogleLoginView.as_view(), name="login-google"),
     path("auth/recuperar-senha/", RecuperarSenhaView.as_view(), name="recuperar-senha"),
     path("auth/verificar-codigo/", VerificarCodigoView.as_view(), name="verificar-codigo"),
     path("auth/nova-senha/", NovaSenhaView.as_view(), name="nova-senha"),

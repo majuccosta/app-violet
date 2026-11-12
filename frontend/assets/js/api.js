@@ -10,6 +10,8 @@ const API_LOCAL = ["localhost", "127.0.0.1"].includes(location.hostname);
 
 const API_CONFIG = {
   BASE_URL: API_LOCAL ? "http://localhost:8000/api" : API_PRODUCAO,
+  // ID do cliente do Google (Google Cloud Console > Credenciais). É público, pode ficar aqui. Vazio = sem botão do Google.
+  GOOGLE_CLIENT_ID: "242753855999-1gbcm4n3ipuddm8as50ft5ucn43rbo9o.apps.googleusercontent.com",
   USE_MOCK: false,
   MOCK_DELAY: 250 // ms, simula a rede
 };
@@ -17,6 +19,7 @@ const API_CONFIG = {
 const ENDPOINTS = {
   login: "/auth/login/",
   cadastro: "/auth/cadastro/",
+  loginGoogle: "/auth/google/",
   recuperarSenha: "/auth/recuperar-senha/",
   verificarCodigo: "/auth/verificar-codigo/",
   novaSenha: "/auth/nova-senha/",
@@ -222,6 +225,7 @@ const local = {
 /* ---------- Mock ---------- */
 const mock = {
   async login({ email }) { await wait(API_CONFIG.MOCK_DELAY); store.set("token", "mock-token"); return { usuaria: { ...M().usuaria, email } }; },
+  async loginGoogle() { await wait(API_CONFIG.MOCK_DELAY); store.set("token", "mock-token"); return {}; },
   async cadastro(dados) { await wait(API_CONFIG.MOCK_DELAY); store.set("cadastro", dados); return { id: 99, ...dados }; },
   async recuperarSenha() { await wait(API_CONFIG.MOCK_DELAY); return { enviado: true }; },
   async verificarCodigo({ codigo }) { await wait(API_CONFIG.MOCK_DELAY); return { valido: codigo.length === 5 }; },
@@ -481,6 +485,8 @@ const mock = {
 /* ---------- API real (mesma assinatura do mock) ---------- */
 const real = {
   login: (d) => http(ENDPOINTS.login, { method: "POST", body: { email: d.email, password: d.senha } })
+    .then((r) => { store.set("token", r.access); store.set("refresh", r.refresh); return r; }),
+  loginGoogle: (credential) => http(ENDPOINTS.loginGoogle, { method: "POST", body: { credential } })
     .then((r) => { store.set("token", r.access); store.set("refresh", r.refresh); return r; }),
   cadastro: (d) => http(ENDPOINTS.cadastro, { method: "POST", body: { nome_completo: d.nome, email: d.email, senha: d.senha, data_nascimento: d.data_nascimento } }),
   // Recuperação de senha: guarda e-mail e código entre as 3 telas (o servidor confere tudo de novo no final)

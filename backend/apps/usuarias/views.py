@@ -4,6 +4,7 @@ from django.db.models import ProtectedError
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializers import (
     AlterarSenhaSerializer, CadastroSerializer, ExcluirContaSerializer, NovaSenhaSerializer,
@@ -11,9 +12,10 @@ from .serializers import (
 )
 from .models import Usuaria
 from .didit import DiditErro
+from .google import GoogleErro
 from .services import (
-    codigo_valido, didit_ativo, enviar_codigo_recuperacao, iniciar_verificacao, processar_webhook, sincronizar,
-    verificar_documento,
+    codigo_valido, didit_ativo, entrar_com_google, enviar_codigo_recuperacao, google_ativo, iniciar_verificacao,
+    processar_webhook, sincronizar, verificar_documento,
 )
 
 log = logging.getLogger(__name__)
@@ -24,6 +26,26 @@ class CadastroView(generics.CreateAPIView):
     serializer_class = CadastroSerializer
     authentication_classes = []   # não valida token enviado (um token vencido não deve bloquear)
     permission_classes = [permissions.AllowAny]
+
+
+class GoogleLoginView(APIView):
+    """POST /api/auth/google/  {credential} -> {access, refresh}  (cria a conta na primeira entrada)"""
+    authentication_classes = []
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        if not google_ativo():
+            return Response({"detail": "Login com Google não está disponível no momento."},
+                            status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        try:
+            usuaria = entrar_com_google(request.data.get("credential"))
+        except GoogleErro as e:
+            codigo = {"dominio": status.HTTP_403_FORBIDDEN, "indisponivel": status.HTTP_502_BAD_GATEWAY}.get(
+                e.codigo, status.HTTP_400_BAD_REQUEST)
+            log.warning("Google: entrada recusada (%s): %s", e.codigo, e)
+            return Response({"detail": str(e)}, status=codigo)
+        refresh = RefreshToken.for_user(usuaria)
+        return Response({"access": str(refresh.access_token), "refresh": str(refresh)})
 
 
 class MeView(generics.RetrieveUpdateAPIView):

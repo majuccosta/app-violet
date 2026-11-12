@@ -148,6 +148,10 @@ DIDIT_API_KEY = env("DIDIT_API_KEY", "")
 DIDIT_WORKFLOW_ID = env("DIDIT_WORKFLOW_ID", "")          # id do workflow criado no console da Didit
 DIDIT_WEBHOOK_SECRET = env("DIDIT_WEBHOOK_SECRET", "")    # segredo do webhook (console da Didit)
 DIDIT_CALLBACK_URL = env("DIDIT_CALLBACK_URL", "")        # opcional: para onde a Didit devolve a usuária
+# Login com Google (Google Cloud Console > Credenciais > ID do cliente OAuth, tipo "Aplicativo da Web")
+GOOGLE_CLIENT_ID = env("GOOGLE_CLIENT_ID", "")
+# Opcional: só aceita e-mails destes domínios, separados por vírgula (ex.: sempreceub.com,ceub.edu.br). Vazio = qualquer conta Google.
+GOOGLE_DOMINIOS_PERMITIDOS = [d for d in env("GOOGLE_DOMINIOS", "").split(",") if d.strip()]
 # Só com DIDIT_API_KEY e DIDIT_WORKFLOW_ID preenchidos a verificação real fica ligada; sem eles vale o modo demonstração.
 
 if not DEBUG:

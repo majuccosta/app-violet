@@ -47,12 +47,8 @@
         <button type="submit" class="btn btn--primary">Entrar</button>
       </form>
 
-      <div class="divider-text">ou entre com</div>
-      <div class="social">
-        <button type="button" aria-label="Entrar com Google" data-social="Google"><i data-icon="google"></i></button>
-        <button type="button" aria-label="Entrar com Apple" data-social="Apple"><i data-icon="apple"></i></button>
-        <button type="button" aria-label="Entrar com Facebook" data-social="Facebook"><i data-icon="facebook"></i></button>
-      </div>
+      <div class="divider-text" id="google-divisor">ou entre com</div>
+      <div id="google-botao" data-texto="signin_with" style="display:flex;justify-content:center;min-height:44px" aria-label="Entrar com Google"></div>
 
       <p class="text-center text-sm text-muted push-bottom">Ainda não tem conta? <a href="cadastro.html" class="link">Cadastre-se</a></p>
     </main>
@@ -62,6 +58,7 @@
   <script src="../assets/js/mock-data.js"></script>
   <script src="../assets/js/api.js"></script>
   <script src="../assets/js/app.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="../assets/js/pages/auth.js"></script>
 </body>
 </html>

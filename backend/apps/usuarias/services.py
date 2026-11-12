@@ -60,6 +60,16 @@ def iniciar_verificacao(usuaria, retorno=None):
     return {"modo": "didit", "url": sessao["url"]}
 
 
+_MINUSCULAS = {"de", "da", "do", "das", "dos", "e", "di", "du", "van", "von", "la", "le"}
+
+
+def nome_legivel(nome):
+    """'MARIA JÚLIA DE CARVALHO COSTA' -> 'Maria Júlia de Carvalho Costa' (documentos vêm em maiúsculas)."""
+    partes = str(nome or "").split()
+    return " ".join(p.lower() if i and p.lower() in _MINUSCULAS else p[:1].upper() + p[1:].lower()
+                    for i, p in enumerate(partes))
+
+
 def _exigir_mulher():
     """O Violet é um app só para mulheres: por padrão, a verificação confere o gênero do documento."""
     return getattr(settings, "DIDIT_EXIGIR_MULHER", True)
@@ -136,8 +146,19 @@ def aplicar_status(verificacao, status_didit, decisao=None):
         verificacao.status = novo
         verificacao.save(update_fields=["status"])
     if novo == VerificacaoIdentidade.Status.APROVADA:
-        verificacao.usuaria.verificada = True
-        verificacao.usuaria.save(update_fields=["verificada"])
+        usuaria = verificacao.usuaria
+        usuaria.verificada = True
+        campos = ["verificada"]
+        # Depois de verificada, o nome e a data de nascimento são os do DOCUMENTO (não os do e-mail/Google)
+        nome = nome_legivel(didit.nome_completo_do_documento(decisao))[:150]
+        if nome:
+            usuaria.nome_completo = nome
+            campos.append("nome_completo")
+        nasc = didit.nascimento_do_documento(decisao)
+        if nasc:
+            usuaria.data_nascimento = nasc
+            campos.append("data_nascimento")
+        usuaria.save(update_fields=campos)
     return verificacao
 
 

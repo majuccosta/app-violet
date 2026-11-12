@@ -77,6 +77,33 @@ def nome_do_documento(decisao):
     return str(item.get("full_name") or item.get("first_name") or "").strip()
 
 
+def _item_do_documento(decisao):
+    try:
+        itens = (decisao or {}).get("id_verifications") or []
+        return (itens[0] or {}) if itens else {}
+    except (AttributeError, IndexError, TypeError):
+        return {}
+
+
+def nome_completo_do_documento(decisao):
+    """Nome completo como está no documento ('' se a Didit não trouxe o nome inteiro)."""
+    item = _item_do_documento(decisao)
+    completo = str(item.get("full_name") or "").strip()
+    if completo:
+        return completo
+    return f"{item.get('first_name') or ''} {item.get('last_name') or ''}".strip() if item.get("last_name") else ""
+
+
+def nascimento_do_documento(decisao):
+    """Data de nascimento do documento (datetime.date) ou None."""
+    from datetime import date
+    bruto = str(_item_do_documento(decisao).get("date_of_birth") or "").strip()[:10]
+    try:
+        return date.fromisoformat(bruto) if bruto else None
+    except ValueError:
+        return None
+
+
 def traduzir_status(status_didit):
     """Status da Didit -> status do Violet ('aprovada', 'reprovada' ou 'pendente').
     'In Review' (análise manual), 'In Progress' etc. continuam pendentes."""

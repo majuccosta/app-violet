@@ -47,28 +47,3 @@ class Mensagem(models.Model):
     class Meta:
         verbose_name_plural = "mensagens"
         ordering = ["criado_em"]
-
-
-class Conexao(models.Model):
-    """Pedido de conexão entre duas usuárias. Só depois que a outra aceita, as duas podem conversar."""
-
-    class Status(models.TextChoices):
-        PENDENTE = "pendente", "Pendente"
-        ACEITA = "aceita", "Aceita"
-        RECUSADA = "recusada", "Recusada"
-
-    de = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="pedidos_enviados")
-    para = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="pedidos_recebidos")
-    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDENTE)
-    conversa = models.ForeignKey(Conversa, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
-    criado_em = models.DateTimeField(auto_now_add=True)
-    respondido_em = models.DateTimeField(null=True, blank=True)
-
-    class Meta:
-        verbose_name = "conexão"
-        verbose_name_plural = "conexões"
-        ordering = ["-criado_em"]
-        unique_together = ("de", "para")
-
-    def __str__(self):
-        return f"{self.de_id} → {self.para_id} ({self.status})"

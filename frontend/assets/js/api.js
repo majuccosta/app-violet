@@ -25,6 +25,7 @@ const ENDPOINTS = {
   novaSenha: "/auth/nova-senha/",
   me: "/usuarias/me/",
   senha: "/usuarias/me/senha/",
+  alterarEmail: "/usuarias/me/email/",
   excluirConta: "/usuarias/me/excluir/",
   verificacao: "/usuarias/verificacao/",
   verificacaoIniciar: "/usuarias/verificacao/iniciar/",
@@ -238,6 +239,7 @@ const mock = {
     if (atual === nova) throw new Error("A nova senha precisa ser diferente da atual.");
     return { ok: true };
   },
+  async alterarEmail({ email }) { await wait(API_CONFIG.MOCK_DELAY); store.set("perfil", { ...store.get("perfil", {}), email }); return { email }; },
   async excluirConta() {
     await wait(API_CONFIG.MOCK_DELAY);
     try { Object.keys(localStorage).filter((k) => k.startsWith("violet:") && !/tema|idioma/.test(k)).forEach((k) => localStorage.removeItem(k)); } catch { /* sem storage */ }
@@ -495,7 +497,7 @@ const real = {
     .then((r) => { if (r.valido) store.set("rec_codigo", d.codigo); return r; }),
   novaSenha: (d) => http(ENDPOINTS.novaSenha, { method: "POST", body: { destino: store.get("rec_destino"), codigo: store.get("rec_codigo"), senha: d.senha } })
     .then((r) => { store.set("rec_destino", null); store.set("rec_codigo", null); return r; }),
-  me: () => http(ENDPOINTS.me).then((u) => ({ ...u, nome: u.nome_completo, primeiro_nome: u.nome_completo.split(" ")[0] })),
+  me: () => http(ENDPOINTS.me).then((u) => ({ ...u, nome: u.apelido || u.nome_completo, primeiro_nome: u.apelido || u.nome_completo.split(" ")[0] })),
   // Verificação real (Didit): devolve {modo:'didit', url} para enviar a usuária, ou {modo:'demo'} sem a Didit
   iniciarVerificacao: () => http(ENDPOINTS.verificacaoIniciar, { method: "POST", body: { retorno: `${location.origin}${location.pathname}?didit=1` } }),
   statusVerificacao: () => http(ENDPOINTS.verificacaoStatus),
@@ -530,8 +532,9 @@ const real = {
     if (Object.keys(resto).length) body.preferencias = resto;
     return http(ENDPOINTS.me, { method: "PATCH", body }).then(() => p);
   },
-  atualizarConta: ({ nome, ...resto }) => http(ENDPOINTS.me, { method: "PATCH", body: nome ? { nome_completo: nome, ...resto } : resto }).then((u) => ({ ...u, nome: u.nome_completo })),
+  atualizarConta: ({ nome, ...resto }) => http(ENDPOINTS.me, { method: "PATCH", body: nome ? { nome_completo: nome, ...resto } : resto }).then((u) => ({ ...u, nome: u.apelido || u.nome_completo })),
   alterarSenha: ({ atual, nova }) => http(ENDPOINTS.senha, { method: "POST", body: { senha_atual: atual, senha_nova: nova } }),
+  alterarEmail: ({ email, senha }) => http(ENDPOINTS.alterarEmail, { method: "POST", body: { email, senha } }),
   excluirConta: ({ senha }) => http(ENDPOINTS.excluirConta, { method: "POST", body: { senha } }).then(() => { store.set("token", null); return null; }),
   listarGrupos: ({ busca = "" } = {}) => http(`${ENDPOINTS.grupos}?busca=${encodeURIComponent(busca)}`),
   obterGrupo: (id) => http(ENDPOINTS.grupo(id)),

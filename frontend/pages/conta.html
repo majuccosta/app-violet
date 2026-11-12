@@ -38,6 +38,11 @@
           <span class="field__error">Digite seu nome completo.</span>
         </div>
         <div class="field">
+          <label class="field__label" for="c-apelido">Apelido <span class="text-muted">(opcional)</span></label>
+          <div class="input-wrap"><i data-icon="user"></i><input id="c-apelido" name="apelido" maxlength="30" autocomplete="nickname" placeholder="Como você quer ser chamada"></div>
+          <span class="field__hint">É o nome que aparece para você e para as outras usuárias. Seu nome real não muda.</span>
+        </div>
+        <div class="field">
           <label class="field__label" for="c-nasc">Data de nascimento</label>
           <div class="input-wrap"><i data-icon="calendar"></i><input id="c-nasc" name="nascimento" autocomplete="bday"></div>
         </div>
@@ -46,6 +51,12 @@
           <label class="field__label" for="c-email">E-mail</label>
           <div class="input-wrap is-locked"><i data-icon="mail"></i><input id="c-email" name="email" type="email" readonly><i data-icon="lock" data-size="sm"></i></div>
           <span class="field__hint">É com ele que você entra no Violet.</span>
+        </div>
+        <div class="field" id="campo-senha-email" hidden>
+          <label class="field__label" for="c-email-senha">Senha atual</label>
+          <div class="input-wrap"><i data-icon="lock"></i><input id="c-email-senha" type="password" autocomplete="current-password"></div>
+          <span class="field__hint">Para trocar o e-mail, confirme sua senha.</span>
+          <span class="field__error">Digite sua senha para trocar o e-mail.</span>
         </div>
         <div class="field">
           <label class="field__label" for="c-tel">Telefone</label>

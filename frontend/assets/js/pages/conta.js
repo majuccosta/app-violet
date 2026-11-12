@@ -3,7 +3,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const { api, initials, icon, validate, loading, toast, phoneMask, openSheet, closeSheet } = window.Violet;
   const $ = (id) => document.getElementById(id);
   const eu = await api.me();
-  const bloqueado = !!eu.verificada;     // depois da verificação, nome e nascimento vêm do documento
+  // Depois da verificação, o nome e a data de nascimento vêm do documento e não mudam.
+  const nomeBloqueado = !!eu.verificada;
+  const nascBloqueado = !!eu.verificada && !!eu.data_nascimento;
 
   /* Limpa o erro do campo assim que a pessoa volta a digitar */
   document.addEventListener("input", (e) => e.target.closest?.(".field")?.classList.remove("is-invalid"));
@@ -11,38 +13,75 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* ---------- Topo ---------- */
   const pintarTopo = (u) => { $("c-iniciais").textContent = initials(u.nome); $("c-nome").textContent = u.nome; };
   pintarTopo(eu);
-  $("c-verificada").hidden = !bloqueado;
+  $("c-verificada").hidden = !eu.verificada;
 
   /* ---------- Dados pessoais ---------- */
   const fd = $("form-dados");
   const nome = $("c-nome-in"), nasc = $("c-nasc"), tel = $("c-tel");
   const dataBR = (iso) => (iso ? iso.split("-").reverse().join("/") : "");
-  nome.value = eu.nome || "";
+  const apelido = $("c-apelido");
+  nome.value = eu.nome_completo || eu.nome || "";
+  apelido.value = eu.apelido || "";
   $("c-email").value = eu.email || "";
   tel.value = eu.telefone || "";
   phoneMask(tel);
-  if (bloqueado) {
+  const trancar = (i) => {
+    i.readOnly = true;
+    const wrap = i.closest(".input-wrap");
+    wrap.classList.add("is-locked");
+    wrap.insertAdjacentHTML("beforeend", icon("lock", "sm"));
+  };
+  if (nomeBloqueado) trancar(nome);
+  if (nomeBloqueado) {
+    const dica = $("dica-bloqueio");
+    if (!nascBloqueado) dica.lastChild.textContent = " O nome vem do seu documento verificado e não pode ser alterado.";
+    dica.hidden = false;
+  }
+  if (nascBloqueado) {
     nasc.value = dataBR(eu.data_nascimento);
-    [nome, nasc].forEach((i) => {
-      i.readOnly = true;
-      const wrap = i.closest(".input-wrap");
-      wrap.classList.add("is-locked");
-      wrap.insertAdjacentHTML("beforeend", icon("lock", "sm"));
-    });
-    $("dica-bloqueio").hidden = false;
+    trancar(nasc);
   } else {
     nasc.type = "date";
     nasc.value = eu.data_nascimento || "";
   }
 
+  /* ---------- E-mail ----------
+     Conta criada com o Google: o e-mail é o do Google e fica trancado.
+     Conta normal (com senha): pode trocar, confirmando a senha. */
+  const emailIn = $("c-email"), emailOriginal = eu.email || "";
+  const campoSenhaEmail = $("campo-senha-email"), senhaEmail = $("c-email-senha");
+  const dicaEmail = emailIn.closest(".field").querySelector(".field__hint");
+  if (eu.tem_senha) {
+    emailIn.readOnly = false;
+    const wrapEmail = emailIn.closest(".input-wrap");
+    wrapEmail.classList.remove("is-locked");
+    [...wrapEmail.children].filter((el) => el !== emailIn)[1]?.remove();      // tira o cadeado
+    dicaEmail.textContent = "É com ele que você entra no Violet. Se trocar, vamos pedir sua senha.";
+    emailIn.addEventListener("input", () => {
+      campoSenhaEmail.hidden = emailIn.value.trim().toLowerCase() === emailOriginal.toLowerCase();
+    });
+  } else {
+    dicaEmail.textContent = "Você entrou com o Google, então este é o e-mail da sua conta Google e não pode ser trocado.";
+  }
+
   fd.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!validate(fd)) return;
-    const dados = { telefone: tel.value.trim() };
-    if (!bloqueado) { dados.nome = nome.value.trim(); if (nasc.value) dados.data_nascimento = nasc.value; }
+    const dados = { telefone: tel.value.trim(), apelido: apelido.value.trim() };
+    if (!nomeBloqueado) dados.nome = nome.value.trim();
+    if (!nascBloqueado && nasc.value) dados.data_nascimento = nasc.value;
     const btn = $("btn-dados");
     loading(btn, true, "Salvando…");
     try {
+      const emailNovo = emailIn.value.trim();
+      if (eu.tem_senha && emailNovo.toLowerCase() !== emailOriginal.toLowerCase()) {
+        if (!senhaEmail.value) {
+          campoSenhaEmail.classList.add("is-invalid"); senhaEmail.focus();
+          loading(btn, false); return;
+        }
+        const r = await api.alterarEmail({ email: emailNovo, senha: senhaEmail.value });
+        emailIn.value = r.email; senhaEmail.value = ""; campoSenhaEmail.hidden = true;
+      }
       const novo = await api.atualizarConta(dados);
       pintarTopo({ ...eu, ...novo, nome: novo.nome || eu.nome });
       toast("Dados salvos! 💜");
@@ -135,6 +174,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     loading(btn, false);
   });
 
+  /* ---------- Conta criada com o Google: não tem senha ----------
+     Não há "senha atual" para trocar (ela pode criar uma em "Esqueceu sua senha?") e a exclusão não pede senha. */
+  if (!eu.tem_senha) {
+    $("abrir-senha").style.display = "none";
+    const campoX = $("x-senha").closest(".field");
+    $("x-senha").required = false;
+    campoX.hidden = true;
+    const aviso = document.querySelector("#form-excluir p.text-sm");
+    if (aviso) aviso.textContent = "Essa ação apaga seus dados, denúncias, contatos e conversas e não pode ser desfeita.";
+  }
+
   /* ---------- Excluir conta ---------- */
   const fx = $("form-excluir");
   $("abrir-excluir").addEventListener("click", () => openSheet("sheet-excluir"));
@@ -145,7 +195,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const btn = $("btn-excluir");
     loading(btn, true, "Excluindo…");
     try {
-      await api.excluirConta({ senha: $("x-senha").value });
+      await api.excluirConta({ senha: $("x-senha").value || "" });
       toast("Conta excluída. Cuide-se! 💜");
       setTimeout(() => (location.href = "../index.html"), 1200);
     } catch (err) { loading(btn, false); toast(err.message); }

@@ -1,5 +1,6 @@
 import logging
 
+from django.core.mail import send_mail
 from django.db.models import ProtectedError
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
@@ -7,7 +8,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializers import (
-    AlterarSenhaSerializer, CadastroSerializer, ExcluirContaSerializer, NovaSenhaSerializer,
+    AlterarEmailSerializer, AlterarSenhaSerializer, CadastroSerializer, ExcluirContaSerializer, NovaSenhaSerializer,
     RecuperarSenhaSerializer, UsuariaSerializer, VerificacaoSerializer, VerificarCodigoSerializer,
 )
 from .models import Usuaria
@@ -66,6 +67,30 @@ class AlterarSenhaView(APIView):
         ser.is_valid(raise_exception=True)
         ser.save()
         return Response({"ok": True})
+
+
+class AlterarEmailView(APIView):
+    """POST /api/usuarias/me/email/  {email, senha} — só para contas com senha. Contas criadas com o Google usam
+    sempre o e-mail do Google (é por ele que o Google as reconhece)."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        u = request.user
+        if not u.has_usable_password():
+            return Response({"detail": "Você entrou com o Google, então o e-mail da conta é sempre o do Google."},
+                            status=status.HTTP_403_FORBIDDEN)
+        ser = AlterarEmailSerializer(data=request.data, context={"request": request})
+        ser.is_valid(raise_exception=True)
+        antigo, novo = u.email, ser.validated_data["email"]
+        if novo != antigo.lower():
+            u.email = u.username = novo
+            u.save(update_fields=["email", "username"])
+            # aviso para o e-mail antigo: se não foi ela, percebe na hora
+            send_mail("Violet — seu e-mail foi alterado",
+                      f"O e-mail da sua conta no Violet foi trocado para {novo}. "
+                      "Se não foi você, redefina sua senha em Esqueceu sua senha? e fale com o suporte.",
+                      None, [antigo], fail_silently=True)
+        return Response({"email": u.email})
 
 
 class ExcluirContaView(APIView):

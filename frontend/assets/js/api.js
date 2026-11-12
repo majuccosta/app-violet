@@ -32,7 +32,6 @@ const ENDPOINTS = {
   verificacaoStatus: "/usuarias/verificacao/status/",
   contatos: "/contatos/",
   conversas: "/conversas/",
-  conexoes: "/conversas/conexoes/",
   mensagens: (id) => `/conversas/${id}/mensagens/`,
   notificacoes: "/notificacoes/",
   denuncias: "/denuncias/",
@@ -88,7 +87,7 @@ function sessaoExpirada() {
    Não entram no cache: mensagens do chat, login e verificação (precisam ser sempre atuais). */
 const CACHE_PREFIXO = "violet:c:";
 const emVoo = new Map();                                   // pedidos iguais ao mesmo tempo viram um só
-const cacheiavel = (path) => !/\/(mensagens|auth|verificacao|conexoes)\//.test(path) && !path.startsWith("/auth/");
+const cacheiavel = (path) => !/\/(mensagens|auth|verificacao)\//.test(path) && !path.startsWith("/auth/");
 const cacheChave = (path) => CACHE_PREFIXO + String(store.get("token", "") || "").slice(-16) + ":" + path;
 function cacheLer(path) {
   try { const v = sessionStorage.getItem(cacheChave(path)); return v ? JSON.parse(v) : null; } catch { return null; }
@@ -382,31 +381,6 @@ const mock = {
     store.set("mensagens:" + conversaId, msgs);
     return true;
   },
-  /* Encontrar outras usuárias e pedidos de conexão (no mock, tudo fica só neste aparelho) */
-  _usuariasBusca: [
-    { id: 101, nome: "Valentina", tone: 2 }, { id: 102, nome: "Pamela", tone: 3 }, { id: 103, nome: "Kiara", tone: 4 },
-    { id: 104, nome: "Amanda", tone: 1 }, { id: 105, nome: "Bianca", tone: 2 }
-  ],
-  async buscarUsuarias(q) {
-    await wait(API_CONFIG.MOCK_DELAY);
-    const termo = String(q || "").trim().toLowerCase();
-    if (termo.length < 3) return [];
-    const rel = store.get("mockConexoes", {});
-    return mock._usuariasBusca.filter((u) => u.nome.toLowerCase().includes(termo)).map((u) => ({ ...u, relacao: rel[u.id] || "nenhuma" }));
-  },
-  async listarConexoes(tipo = "recebidas") {
-    await wait(80);
-    if (tipo !== "recebidas" || store.get("mockConexoes", {}).c9001) return [];
-    return [{ id: 9001, status: "pendente", direcao: "recebida", pessoa: { id: 106, nome: "Larissa", tone: 3 }, conversa_id: null }];
-  },
-  async pedirConexao(id) {
-    await wait(300);
-    store.set("mockConexoes", { ...store.get("mockConexoes", {}), [id]: "enviada" });
-    return { id: Date.now(), status: "pendente", direcao: "enviada", conversa_id: null };
-  },
-  async aceitarConexao(id) { await wait(300); store.set("mockConexoes", { ...store.get("mockConexoes", {}), ["c" + id]: "aceita" }); return { id, status: "aceita", conversa_id: 4 }; },
-  async recusarConexao(id) { await wait(300); store.set("mockConexoes", { ...store.get("mockConexoes", {}), ["c" + id]: "recusada" }); return { detail: "Pedido recusado." }; },
-  async cancelarConexao() { await wait(200); return null; },
   async listarNotificacoes() { await wait(API_CONFIG.MOCK_DELAY); return clone(M().notificacoes); },
 
   async listarDenuncias() { await wait(API_CONFIG.MOCK_DELAY); return [...store.get("denuncias", []), ...clone(M().denuncias)]; },
@@ -543,12 +517,6 @@ const real = {
   criarGrupoConversa: (d) => http(ENDPOINTS.conversas, { method: "POST", body: { tipo: "grupo", nome: d.nome, descricao: d.descricao, cor: d.tone, membros: d.membros.map((m) => m.id) } }),
   listarMensagens: (id) => http(ENDPOINTS.mensagens(id)),
   enviarMensagem: (id, texto) => http(ENDPOINTS.mensagens(id), { method: "POST", body: { texto } }),
-  buscarUsuarias: (q) => http(`${ENDPOINTS.conexoes}buscar/?q=${encodeURIComponent(q)}`),
-  listarConexoes: (tipo = "recebidas") => http(`${ENDPOINTS.conexoes}?tipo=${tipo}`),
-  pedirConexao: (usuariaId) => http(ENDPOINTS.conexoes, { method: "POST", body: { usuaria: usuariaId } }),
-  aceitarConexao: (id) => http(`${ENDPOINTS.conexoes}${id}/aceitar/`, { method: "POST" }),
-  recusarConexao: (id) => http(`${ENDPOINTS.conexoes}${id}/recusar/`, { method: "POST" }),
-  cancelarConexao: (id) => http(`${ENDPOINTS.conexoes}${id}/`, { method: "DELETE" }),
   listarNotificacoes: () => http(ENDPOINTS.notificacoes),
   listarDenuncias: () => http(ENDPOINTS.denuncias),
   criarDenuncia: (form) => http(ENDPOINTS.denuncias, { method: "POST", form }),

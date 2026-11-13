@@ -11,8 +11,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
     const dia = new Date(d); dia.setHours(0, 0, 0, 0);
     const diff = Math.round((dia - hoje) / 86400e3);
-    const hora = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-    const rotulo = diff === 0 ? "Hoje" : diff === 1 ? "Amanhã" : d.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "2-digit" });
+    const hora = d.toLocaleTimeString((document.documentElement.lang || "pt-BR"), { hour: "2-digit", minute: "2-digit" });
+    const rotulo = diff === 0 ? "Hoje" : diff === 1 ? "Amanhã" : d.toLocaleDateString((document.documentElement.lang || "pt-BR"), { weekday: "short", day: "2-digit", month: "2-digit" });
     return `${rotulo} · ${hora}`;
   };
   const avatares = (ps) => `<span class="avatars">${ps.slice(0, 4).map((p) =>

@@ -21,8 +21,14 @@ A API roda no plano gratuito do Render e **dorme após alguns minutos sem uso**.
 ```
  Usuária ──► Front-end (GitHub Pages) ──► API (Render, Django REST) ──► Banco (PostgreSQL / Supabase)
                                                     │
-                                                    └─► IA de análise de evidências (TensorFlow Lite)
+                                                    ├─► IA de análise de evidências (TensorFlow Lite)
+                                                    ├─► Didit (verificação de identidade)
+                                                    ├─► IBGE (estimativa de gênero pelo primeiro nome)
+                                                    ├─► Google (entrar com Google)
+                                                    └─► Brevo (e-mail de recuperação de senha)
 ```
+
+O UptimeRobot consulta `GET /api/saude/` de tempos em tempos para a API do Render não dormir.
 
 ## Estrutura do repositório
 
@@ -43,7 +49,11 @@ A API roda no plano gratuito do Render e **dorme após alguns minutos sem uso**.
 - **Back-end:** Python, Django, Django REST Framework, SimpleJWT
 - **Banco de dados:** PostgreSQL (Supabase)
 - **IA:** TensorFlow Lite (`ai-edge-litert`) com modelo MobileNetV2
+- **Verificação de identidade:** Didit (documento + selfie), com a regra "só mulheres" (gênero do documento; se faltar, estimativa pelo primeiro nome com a base do IBGE)
+- **Login social:** Google (tokeninfo)
+- **E-mail:** Brevo (API HTTP, porque o Render bloqueia SMTP)
 - **Publicação:** GitHub Pages (front-end) e Render (API)
+- **Monitoramento:** UptimeRobot (`/api/saude/`)
 
 ## Inteligência artificial nas denúncias
 
@@ -57,40 +67,60 @@ Limites conhecidos:
 
 O código está em `backend/apps/ia/`.
 
+## Verificação de identidade e regra "só mulheres"
+
+1. A usuária cria a conta e o app chama `POST /api/usuarias/verificacao/iniciar/`, que abre uma sessão na Didit.
+2. Ela fotografa o documento e faz uma selfie na página da Didit. **As imagens ficam na Didit**; o Violet guarda só o resultado e o código da sessão.
+3. A Didit avisa o Violet por webhook (assinatura HMAC `X-Signature-V2`, exige `DIDIT_WEBHOOK_SECRET`) e o app também consulta `GET /api/usuarias/verificacao/status/`.
+4. Regra "só mulheres": gênero do documento F aprova e M reprova. Se o documento não informa o gênero, o Violet estima pelo primeiro nome com a tabela do IBGE (`apps/usuarias/dados/nomes_ibge.json`, gerada por `python manage.py baixar_nomes_ibge`; se faltar, consulta a API do IBGE). Caso ambíguo ou sem dado, a verificação fica **pendente** para revisão de uma administradora.
+5. Depois de aprovada, o nome da conta passa a ser o do documento. A data de nascimento é a informada no cadastro e não muda depois.
+
+Também há login com Google (`POST /api/auth/google/`): a conta nova entra sem verificação e sem data de nascimento, e passa pela tela "Complete seu cadastro".
+
 ## Como rodar localmente
 
 Requisitos: Python 3.10 ou superior e PostgreSQL.
 
-**1. Banco de dados**
+**1. Banco de dados e API**
 
 ```bash
 createdb violet
-psql -d violet -f database/schema.sql
-psql -d violet -f database/seed.sql
-```
-
-**2. API**
-
-```bash
 cd backend
 python -m venv .venv
 # Windows: .venv\Scripts\activate    |    Linux/Mac: source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env        # preencha com os dados do seu banco
+python manage.py migrate    # cria as tabelas
+psql -d violet -f ../database/seed.sql   # opcional: dados fictícios (só em desenvolvimento)
 python manage.py runserver
 ```
 
-A API sobe em `http://localhost:8000/api/`.
+A API sobe em `http://localhost:8000/api/`. O `database/schema.sql` é a estrutura de referência das 18 tabelas (veja `database/README.md`); para rodar a API use o `migrate`, que também cria as tabelas internas do Django.
+
+**2. Variáveis de ambiente** (arquivo `backend/.env`, modelo em `backend/.env.example`; nunca suba o `.env` para o GitHub)
+
+| Variável | Para que serve |
+|---|---|
+| `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS` | Configuração básica do Django (em produção: `DJANGO_DEBUG=False`) |
+| `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, `DB_SSLMODE`, `DB_CONN_MAX_AGE` | Conexão com o PostgreSQL (na nuvem: `DB_SSLMODE=require`) |
+| `CORS_ORIGINS`, `CSRF_ORIGINS` | Endereços do front-end autorizados |
+| `VERIFICACAO_DEMO` | `True` aprova a verificação sem a Didit (só para demonstração; desligue em produção) |
+| `DIDIT_API_KEY`, `DIDIT_WORKFLOW_ID`, `DIDIT_WEBHOOK_SECRET`, `DIDIT_CALLBACK_URL` | Verificação de identidade real pela Didit |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_DOMINIOS` | Entrar com Google (domínios de e-mail permitidos são opcionais) |
+| `BREVO_API_KEY`, `EMAIL_REMETENTE` | Envio de e-mail pela Brevo (o remetente precisa estar confirmado na Brevo) |
+
+Sem `DIDIT_*`, `GOOGLE_CLIENT_ID` ou `BREVO_API_KEY`, o recurso correspondente fica desligado ou em modo de demonstração (o e-mail aparece no terminal do `runserver`).
 
 **3. Front-end**
 
 Abra a pasta `frontend/` com o Live Server do VS Code (porta 5500). Quando aberto em `localhost` ou `127.0.0.1`, o app usa automaticamente a API local; no GitHub Pages, ele usa a API do Render.
 
-**Testes da IA**
+**Testes**
 
 ```bash
 cd backend
-python -m unittest apps.ia.tests -v
+python manage.py test            # todos os testes (158 em 12/11/2026)
+python manage.py test apps.ia    # só a IA
 ```
 
 ## Equipe

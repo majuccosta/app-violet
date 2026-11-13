@@ -1,9 +1,13 @@
 -- ==========================================================
 -- VIOLET — Banco físico (PostgreSQL)
--- Ponto de partida espelhando backend/apps/*/models.py.
--- Os nomes das tabelas seguem o padrão do Django (<app>_<modelo>),
--- então este script e o `manage.py migrate` geram a mesma estrutura.
--- Use UM dos dois caminhos (ver database/README.md).
+-- Espelha backend/apps/*/models.py no estado atual (18 tabelas do Violet).
+-- Os nomes das tabelas seguem o padrão do Django (<app>_<modelo>).
+-- Este script NÃO cria as tabelas internas do Django (sessões, permissões,
+-- django_migrations...). Para a API rodar, use `python manage.py migrate`
+-- (caminho recomendado em database/README.md); este arquivo serve como
+-- referência e como entrega da estrutura do banco.
+-- Atualizado em 12/11/2026: campo apelido; conversas com criadora e membros;
+-- sem a tabela de conexões (removida na migração conversas 0004).
 -- ==========================================================
 
 BEGIN;
@@ -22,6 +26,7 @@ CREATE TABLE usuarias_usuaria (
     is_active        BOOLEAN NOT NULL DEFAULT TRUE,
     date_joined      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     nome_completo    VARCHAR(150) NOT NULL,
+    apelido          VARCHAR(30)  NOT NULL DEFAULT '',    -- como a pessoa quer ser chamada; o nome do documento não muda
     data_nascimento  DATE,
     telefone         VARCHAR(20) NOT NULL DEFAULT '',
     verificada       BOOLEAN NOT NULL DEFAULT FALSE,
@@ -54,6 +59,7 @@ CREATE TABLE usuarias_preferencias (
     visivel_circulo   BOOLEAN NOT NULL DEFAULT TRUE
 );
 
+-- Só o resultado e o código da sessão na Didit. As imagens do documento e da selfie NÃO são guardadas aqui.
 CREATE TABLE usuarias_verificacaoidentidade (
     id               BIGSERIAL PRIMARY KEY,
     usuaria_id       BIGINT NOT NULL REFERENCES usuarias_usuaria(id) ON DELETE CASCADE,
@@ -138,6 +144,8 @@ CREATE TABLE conversas_conversa (
     nome       VARCHAR(40) NOT NULL DEFAULT '',   -- só em grupos de conversa
     descricao  VARCHAR(80) NOT NULL DEFAULT '',
     cor        SMALLINT    NOT NULL DEFAULT 1,
+    criadora_id  BIGINT REFERENCES usuarias_usuaria(id) ON DELETE SET NULL,   -- quem criou o grupo de conversa
+    membros      JSONB  NOT NULL DEFAULT '[]',                                -- contatos convidados (nome + id; não precisam ter conta)
     criado_em  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

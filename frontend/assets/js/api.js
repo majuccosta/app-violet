@@ -145,6 +145,45 @@ async function http(path, opts = {}, jaRenovou = false) {
   return buscar();
 }
 
+/* ---------- Mensagens de erro da API em português ----------
+   O Django, o DRF e o simplejwt às vezes devolvem a mensagem em inglês. Aqui ela vira português antes de aparecer na tela. */
+const ERROS_EN = [
+  [/No active account found with the given credentials|Unable to log in with provided credentials/i, "E-mail ou senha incorretos."],
+  [/Authentication credentials were not provided/i, "Entre na sua conta para continuar."],
+  [/Given token not valid for any token type|Token is invalid or expired|Token is expired|Token is invalid|Invalid token|Incorrect authentication credentials|token.*(not valid|expired)/i, "Sua sessão expirou. Entre novamente."],
+  [/You do not have permission to perform this action/i, "Você não tem permissão para fazer isso."],
+  [/Request was throttled.*?(\d+)\s*second/i, (m) => `Muitas tentativas. Aguarde ${m[1]} segundos e tente de novo.`],
+  [/Request was throttled/i, "Muitas tentativas. Aguarde um instante e tente de novo."],
+  [/^Not found\.?$/i, "Não encontrado."],
+  [/Method .* not allowed/i, "Ação não permitida."],
+  [/Unsupported media type/i, "Tipo de arquivo não aceito."],
+  [/Authorization header must contain two space-delimited values|Token contained no recognizable user identification|User not found|User is inactive|Token is blacklisted/i, "Sua sessão não é mais válida. Entre novamente."],
+  [/A server error occurred|Internal Server Error|Server Error/i, "Erro no servidor. Tente novamente em instantes."],
+  [/Invalid page/i, "Página inválida."],
+  [/This field is required|This field may not be (blank|null)/i, "Preencha este campo."],
+  [/Enter a valid email address/i, "Informe um e-mail válido."],
+  [/(user|usu[aá]ria).*(e-?mail).*already exists|already exists/i, "Já existe uma conta com este e-mail."],
+  [/Ensure this field has at least (\d+) characters/i, (m) => `Use pelo menos ${m[1]} caracteres.`],
+  [/Ensure this field has no more than (\d+) characters/i, (m) => `Use no máximo ${m[1]} caracteres.`],
+  [/This password is too short.*?(\d+) characters/i, (m) => `A senha é curta demais. Use pelo menos ${m[1]} caracteres.`],
+  [/This password is too common/i, "Essa senha é muito comum. Escolha outra."],
+  [/This password is entirely numeric/i, "A senha não pode ter só números."],
+  [/password.*too similar/i, "A senha é parecida demais com seus dados pessoais."],
+  [/Failed to fetch|Load failed|NetworkError|Network request failed/i, "Sem conexão com o servidor. Verifique sua internet e tente novamente."],
+];
+function traduzirErro(msg) {
+  const texto = String(msg || "");
+  for (const [regra, pt] of ERROS_EN) {
+    const m = texto.match(regra);
+    if (m) return typeof pt === "function" ? pt(m) : pt;
+  }
+  // Rede de segurança: texto só com letras sem acento e palavras comuns do inglês vira uma mensagem genérica
+  if (/^[\x20-\x7E]+$/.test(texto) && /\b(the|is|are|was|not|must|please|with|this|field|valid|error|invalid|expired|failed|given|found)\b/i.test(texto)) {
+    return "Não foi possível concluir. Tente novamente.";
+  }
+  return texto;
+}
+
 async function httpBruto(path, { method = "GET", body, form } = {}, jaRenovou = false) {
   const headers = { Accept: "application/json" };
   const token = store.get("token", null);
@@ -185,7 +224,7 @@ async function httpBruto(path, { method = "GET", body, form } = {}, jaRenovou = 
     } catch { /* resposta sem JSON */ }
     // Conta ainda sem verificação de identidade: volta para a verificação
     if (res.status === 403 && /verifica[çc][ãa]o de identidade/i.test(msg) && !location.pathname.endsWith("verificacao.html")) location.replace("verificacao.html");
-    throw new Error(msg);
+    throw new Error(traduzirErro(msg));
   }
   if (res.status === 204) return null;
   const data = await res.json();

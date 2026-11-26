@@ -15,6 +15,7 @@ ALTER TABLE usuarias_usuaria ALTER COLUMN last_name SET DEFAULT '';
 ALTER TABLE usuarias_usuaria ALTER COLUMN is_staff SET DEFAULT FALSE;
 ALTER TABLE usuarias_usuaria ALTER COLUMN is_active SET DEFAULT TRUE;
 ALTER TABLE usuarias_usuaria ALTER COLUMN date_joined SET DEFAULT NOW();
+ALTER TABLE usuarias_usuaria ALTER COLUMN apelido SET DEFAULT '';
 ALTER TABLE usuarias_usuaria ALTER COLUMN telefone SET DEFAULT '';
 ALTER TABLE usuarias_usuaria ALTER COLUMN verificada SET DEFAULT FALSE;
 ALTER TABLE usuarias_usuaria ALTER COLUMN modo_anonimo SET DEFAULT FALSE;
@@ -244,5 +245,12 @@ UPDATE orientacoes_orientacao SET resumo='Saiba como agir e se proteger nessas s
 UPDATE orientacoes_orientacao SET resumo='Entenda o passo a passo para fazer uma denúncia.', aviso='Sua denúncia é confidencial e será encaminhada aos responsáveis adequados. As evidências passam por uma análise de apoio com IA, que não comprova a ocorrência: a avaliação final é sempre humana.', conteudo='{"passos":[{"t":"Reúna as evidências","d":"Salve prints, fotos, vídeos, mensagens e anote detalhes do ocorrido.","i":"image"},{"t":"Preencha o formulário","d":"Descreva o que aconteceu e anexe as evidências, se tiver.","i":"file-text"},{"t":"Revise e envie","d":"Confira as informações e finalize o envio da denúncia. Você recebe um número de protocolo.","i":"send"}]}' WHERE slug='denunciar';
 UPDATE orientacoes_orientacao SET resumo='Canais oficiais e serviços de apoio.', aviso='O Violet não substitui os serviços oficiais. Em perigo imediato, ligue 190.', conteudo='{"canais":[{"nome":"Central de Atendimento à Mulher","numero":"180","desc":"Atendimento 24h, gratuito e anônimo.","icon":"phone"},{"nome":"Polícia Militar","numero":"190","desc":"Emergência e atendimento imediato.","icon":"shield"},{"nome":"CVV — Apoio emocional","numero":"188","desc":"Escuta e apoio emocional, 24h.","icon":"message"},{"nome":"Núcleo de Apoio da Universidade","numero":null,"desc":"Apoio psicológico, jurídico e social.","icon":"building"},{"nome":"Serviço de Saúde Mental","numero":null,"desc":"Atendimento psicológico especializado.","icon":"heart"},{"nome":"Delegacia da Mulher (DEAM)","numero":null,"desc":"Procure a delegacia especializada mais próxima.","icon":"flag"},{"nome":"Ouvidoria da instituição","numero":null,"desc":"Registre ocorrências direto com a universidade.","icon":"file-text"}]}' WHERE slug='ajuda';
 UPDATE orientacoes_orientacao SET resumo='Entenda como ele funciona e quando usar.', aviso='', conteudo='{"faq":[{"q":"Onde fica?","a":"Sempre visível na tela inicial."},{"q":"Como aciono?","a":"Segure o botão por 3 segundos. Assim evitamos toques acidentais."},{"q":"Quem recebe?","a":"Seus contatos de confiança e o serviço de emergência."},{"q":"O que envia?","a":"Sua localização em tempo real, áudio, foto e vídeo (se autorizado)."}]}' WHERE slug='botao';
+
+-- Orientação sobre a saída rápida (tela de lista de compras)
+INSERT INTO orientacoes_orientacao (slug, titulo, resumo, icone, ordem, aviso, conteudo) VALUES
+ ('saida-rapida', 'Como esconder o app rapidamente?', 'A saída rápida troca o Violet por uma lista de compras.', 'eye-off', 5,
+  'Se alguém estiver olhando seu celular, use a saída rápida primeiro. Em perigo imediato, ligue 190.',
+  '{"passos":[{"t":"Toque no olho riscado","d":"O botão com o olho riscado fica na tela inicial e nas demais telas do app. No computador, aperte Esc duas vezes seguidas."},{"t":"O app vira uma lista de compras","d":"Quem olhar vê só uma lista de compras comum, com itens que podem ser marcados. Nada indica que o Violet existe. O botão voltar do navegador também não leva de volta ao app."},{"t":"Volte ao Violet","d":"Segure o título \"Lista de compras\" por 2 segundos. Se você criou um PIN, o app pede o PIN ao voltar."},{"t":"Deixe tudo pronto antes","d":"Em Configurações, crie um PIN e confira se o botão de saída rápida está ligado. Assim você não precisa pensar nisso na hora."}]}')
+ON CONFLICT (slug) DO UPDATE SET titulo=EXCLUDED.titulo, resumo=EXCLUDED.resumo, icone=EXCLUDED.icone, ordem=EXCLUDED.ordem, aviso=EXCLUDED.aviso, conteudo=EXCLUDED.conteudo;
 
 COMMIT;

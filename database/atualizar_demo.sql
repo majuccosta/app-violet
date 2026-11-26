@@ -47,4 +47,11 @@ INSERT INTO contatos_contatoconfianca (usuaria_id, nome, telefone, relacao, comp
 SELECT 1, 'Ana Clara Mendes', '(61) 99111-0005', 'Amiga', TRUE, TRUE
 WHERE NOT EXISTS (SELECT 1 FROM contatos_contatoconfianca WHERE usuaria_id = 1 AND nome = 'Ana Clara Mendes');
 
+-- Orientação sobre a saída rápida (tela de lista de compras)
+INSERT INTO orientacoes_orientacao (slug, titulo, resumo, icone, ordem, aviso, conteudo) VALUES
+ ('saida-rapida', 'Como esconder o app rapidamente?', 'A saída rápida troca o Violet por uma lista de compras.', 'eye-off', 5,
+  'Se alguém estiver olhando seu celular, use a saída rápida primeiro. Em perigo imediato, ligue 190.',
+  '{"passos":[{"t":"Toque no olho riscado","d":"O botão com o olho riscado fica na tela inicial e nas demais telas do app. No computador, aperte Esc duas vezes seguidas."},{"t":"O app vira uma lista de compras","d":"Quem olhar vê só uma lista de compras comum, com itens que podem ser marcados. Nada indica que o Violet existe. O botão voltar do navegador também não leva de volta ao app."},{"t":"Volte ao Violet","d":"Segure o título \"Lista de compras\" por 2 segundos. Se você criou um PIN, o app pede o PIN ao voltar."},{"t":"Deixe tudo pronto antes","d":"Em Configurações, crie um PIN e confira se o botão de saída rápida está ligado. Assim você não precisa pensar nisso na hora."}]}')
+ON CONFLICT (slug) DO UPDATE SET titulo=EXCLUDED.titulo, resumo=EXCLUDED.resumo, icone=EXCLUDED.icone, ordem=EXCLUDED.ordem, aviso=EXCLUDED.aviso, conteudo=EXCLUDED.conteudo;
+
 COMMIT;

@@ -244,6 +244,31 @@ window.VIOLET_MOCK = {
                   "a": "Sua localização em tempo real, áudio, foto e vídeo (se autorizado)."
               }
           ]
+      },
+      {
+          "id": "saida-rapida",
+          "titulo": "Como esconder o app rapidamente?",
+          "resumo": "A saída rápida troca o Violet por uma lista de compras.",
+          "icon": "eye-off",
+          "passos": [
+              {
+                  "t": "Toque no olho riscado",
+                  "d": "O botão com o olho riscado fica na tela inicial e nas demais telas do app. No computador, aperte Esc duas vezes seguidas."
+              },
+              {
+                  "t": "O app vira uma lista de compras",
+                  "d": "Quem olhar vê só uma lista de compras comum, com itens que podem ser marcados. Nada indica que o Violet existe. O botão voltar do navegador também não leva de volta ao app."
+              },
+              {
+                  "t": "Volte ao Violet",
+                  "d": "Segure o título \"Lista de compras\" por 2 segundos. Se você criou um PIN, o app pede o PIN ao voltar."
+              },
+              {
+                  "t": "Deixe tudo pronto antes",
+                  "d": "Em Configurações, crie um PIN e confira se o botão de saída rápida está ligado. Assim você não precisa pensar nisso na hora."
+              }
+          ],
+          "aviso": "Se alguém estiver olhando seu celular, use a saída rápida primeiro. Em perigo imediato, ligue 190."
       }
   ]
 };

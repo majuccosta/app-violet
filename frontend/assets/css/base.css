@@ -73,6 +73,19 @@ h4 { font-size: var(--fs-md); font-weight: 600; }
   }
 }
 
+/* No computador o aparelho acompanha o tamanho da janela (escala calculada em theme.js).
+   A tela de boas-vindas tem a própria regra em pages.css. */
+@media (min-width: 640px) {
+  :root { --pad-b: 16px; }   /* espaço embaixo do aparelho (usado por botões fixos) */
+  body:not(:has(.welcome)) { padding: 16px 0; }
+  .app:not(:has(> .welcome)) {
+    zoom: var(--escala, 1);
+    height: var(--app-h, auto);
+    min-height: 0;
+    max-height: none;
+  }
+}
+
 .screen {
   flex: 1;
   min-width: 0;

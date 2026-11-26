@@ -99,3 +99,21 @@
   document.addEventListener("DOMContentLoaded", () => aplicar(ler()));
   document.addEventListener("click", (e) => { if (e.target.closest("[data-theme-toggle]")) tema.alternar(); });
 })();
+
+/* ---------- Escala do app no computador ----------
+   O app é um "aparelho" de 420 px. Aqui ele encolhe e cresce junto com a janela (como a tela de boas-vindas),
+   em vez de ficar com tamanho fixo e fazer a página rolar. No celular (< 640 px) nada muda. */
+(function () {
+  const raiz = document.documentElement;
+  function ajustar() {
+    const alt = window.innerHeight, larg = window.innerWidth;
+    if (larg < 640) { raiz.style.removeProperty("--escala"); raiz.style.removeProperty("--app-h"); return; }
+    let s = (alt - 32) / 880;                 // 880 = altura de referência do aparelho
+    s = Math.min(s, (larg - 16) / 420, 1.6);  // não passa da largura da janela nem de 160%
+    s = Math.max(s, 0.5);
+    raiz.style.setProperty("--escala", s.toFixed(3));
+    raiz.style.setProperty("--app-h", ((alt - 32) / s).toFixed(1) + "px");
+  }
+  ajustar();
+  window.addEventListener("resize", ajustar);
+})();

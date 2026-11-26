@@ -43,9 +43,9 @@
       copia.classList.add("is-medindo");
       copia.classList.remove("no-anim");
       // Fora do fluxo da página e com a mesma largura da barra real: não altera o layout (nem a barra de rolagem)
-      copia.style.cssText = `position:fixed;left:-10000px;top:0;margin:0;transform:none;width:${nav.getBoundingClientRect().width}px`;
+      copia.style.cssText = `position:fixed;left:-10000px;top:0;margin:0;transform:none;width:${nav.offsetWidth}px`;   // offsetWidth = largura de layout (sem a escala do computador)
       copia.querySelectorAll("a[data-i]").forEach((a) => a.classList.toggle("is-active", Number(a.dataset.i) === indice));
-      document.body.appendChild(copia);
+      (nav.parentNode || document.body).appendChild(copia);   // dentro do app: recebe a mesma escala da barra real
       const alvo = copia.querySelector(`a[data-i="${indice}"]`);
       const x = alvo ? alvo.offsetLeft + 4 : 4;
       copia.remove();

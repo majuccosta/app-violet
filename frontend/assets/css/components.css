@@ -545,9 +545,10 @@ a.list-item:hover .list-item__chev, a.list-item:hover > svg:last-child { transfo
 
 /* ---------- Toast ---------- */
 .toast {
-  position: fixed; left: 50%; bottom: calc(var(--nav-h) + 24px); z-index: 100;
+  position: fixed; left: calc(50vw / var(--escala, 1)); bottom: calc(var(--nav-h) + 24px + var(--pad-b, 0px) / var(--escala, 1)); z-index: 100;
+  zoom: var(--escala, 1);
   transform: translate(-50%, 20px); opacity: 0;
-  max-width: calc(min(100vw, var(--app-w)) - 32px);
+  max-width: calc(min(100vw / var(--escala, 1), var(--app-w)) - 32px);
   padding: 12px 18px; border-radius: var(--r-md);
   background: var(--ink-900); color: var(--on-ink); font-size: var(--fs-sm); font-weight: 500;
   box-shadow: var(--shadow-lg); transition: opacity .25s, transform .25s var(--ease);
@@ -654,11 +655,12 @@ html.is-locked body > *:not(.lock) { visibility: hidden; }
 
 .quick-exit {
   position: fixed; z-index: 25; width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line, #e6dcee);
-  left: calc(50% - min(100vw, var(--app-w)) / 2 + 12px); bottom: 84px;
+  zoom: var(--escala, 1);   /* acompanha o tamanho do app no computador (valores abaixo em unidades sem escala) */
+  left: calc(50vw / var(--escala, 1) - min(100vw / var(--escala, 1), var(--app-w)) / 2 + 12px); bottom: calc(84px + var(--pad-b, 0px) / var(--escala, 1));
   background: color-mix(in srgb, var(--surface, #fff) 88%, transparent); color: var(--ink-700, #5b3f72);
   display: grid; place-items: center; cursor: pointer; box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,.12)); opacity: .85;
 }
-.quick-exit--nav { bottom: calc(var(--nav-h) + var(--nav-gap) + 38px); }
+.quick-exit--nav { bottom: calc(var(--nav-h) + var(--nav-gap) + 38px + var(--pad-b, 0px) / var(--escala, 1)); }
 .quick-exit:hover, .quick-exit:focus-visible { opacity: 1; }
 
 .aviso-rede { position: fixed; inset: 0; z-index: 190; display: grid; place-items: center; padding: var(--sp-5); background: rgba(30, 8, 45, .72); }

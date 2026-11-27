@@ -117,9 +117,14 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     if (!validate(formEmail)) return;
     const destino = document.getElementById("rec-email").value.trim();
-    await api.recuperarSenha({ destino });
-    document.getElementById("rec-destino").textContent = destino;
-    ir(2);
+    const btn = formEmail.querySelector("[type=submit]");
+    loading(btn, true, "Enviando…");
+    try {
+      await api.recuperarSenha({ destino });
+      document.getElementById("rec-destino").textContent = destino;
+      ir(2);
+    } catch (err) { toast(err.message); }
+    loading(btn, false);
   });
 
   // Campos do código: avança/volta automaticamente
@@ -144,8 +149,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("form-codigo").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const { valido } = await api.verificarCodigo({ codigo: otp.map((o) => o.value).join("") });
-    valido ? ir(3) : toast("Código inválido. Confira e tente de novo.");
+    const btn = document.getElementById("btn-codigo");
+    loading(btn, true, "Conferindo…");
+    try {
+      const { valido } = await api.verificarCodigo({ codigo: otp.map((o) => o.value).join("") });
+      valido ? ir(3) : toast("Código inválido ou expirado. Confira e tente de novo.");
+    } catch (err) { toast(err.message); }
+    loading(btn, false);
   });
   
   const btnReenviar = document.getElementById("btn-reenviar");
@@ -168,7 +178,12 @@ document.addEventListener("DOMContentLoaded", () => {
   formSenha.addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!validate(formSenha)) return;
-    await api.novaSenha({ senha: document.getElementById("nova-senha").value });
-    ir(4);
+    const btn = formSenha.querySelector("[type=submit]");
+    loading(btn, true, "Salvando…");
+    try {
+      await api.novaSenha({ senha: document.getElementById("nova-senha").value });
+      ir(4);   // só mostra "senha alterada" quando o servidor confirmou
+    } catch (err) { toast(err.message); }
+    loading(btn, false);
   });
 });

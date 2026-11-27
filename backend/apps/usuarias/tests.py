@@ -67,6 +67,25 @@ class RecuperacaoSenhaTests(TestCase):
         r = c.post("/api/auth/nova-senha/", {"destino": u.email, "codigo": codigo, "senha": "Outra@Senha2026"}, format="json")
         self.assertEqual(r.status_code, 400)
 
+    def test_nova_senha_igual_a_anterior_e_recusada(self):
+        u = criar_usuaria()
+        c = APIClient()
+        codigo = _codigo(u, _janela_atual())
+        r = c.post("/api/auth/nova-senha/", {"destino": u.email, "codigo": codigo, "senha": SENHA}, format="json")
+        self.assertEqual(r.status_code, 400)
+        self.assertIn("diferente da anterior", r.data["detail"])
+        u.refresh_from_db()
+        self.assertTrue(u.check_password(SENHA))
+        # a senha não mudou, então o código continua valendo para uma senha diferente
+        r = c.post("/api/auth/nova-senha/", {"destino": u.email, "codigo": codigo, "senha": "Nova@Senha2026"}, format="json")
+        self.assertEqual(r.status_code, 200)
+
+    def test_senha_igual_com_codigo_errado_nao_revela_nada(self):
+        u = criar_usuaria()
+        r = APIClient().post("/api/auth/nova-senha/", {"destino": u.email, "codigo": "000000", "senha": SENHA}, format="json")
+        self.assertEqual(r.status_code, 400)
+        self.assertIn("Código inválido", r.data["detail"])
+
     def test_email_inexistente_responde_igual(self):
         r = APIClient().post("/api/auth/recuperar-senha/", {"destino": "naoexiste@ceub.edu.br"}, format="json")
         self.assertEqual(r.status_code, 200)

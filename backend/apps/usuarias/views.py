@@ -213,6 +213,9 @@ class NovaSenhaView(APIView):
         usuaria = Usuaria.objects.filter(email__iexact=d["destino"]).first()
         if not (usuaria and codigo_valido(usuaria, d["codigo"])):
             return Response({"detail": "Código inválido ou expirado."}, status=status.HTTP_400_BAD_REQUEST)
+        # Só depois de o código ser válido: a nova senha não pode ser igual à que a conta já tem
+        if usuaria.has_usable_password() and usuaria.check_password(d["senha"]):
+            return Response({"detail": "A nova senha precisa ser diferente da anterior."}, status=status.HTTP_400_BAD_REQUEST)
         usuaria.set_password(d["senha"])
         usuaria.save(update_fields=["password"])
         return Response({"ok": True})
